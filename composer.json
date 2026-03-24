@@ -1,0 +1,18 @@
+{
+    "name": "malsa/laravel-task-orchestrator",
+    "description": "Lightweight Laravel task orchestration dashboard with scheduling, dependencies and real-time monitoring",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Malsa\\TaskOrchestrator\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Malsa\\TaskOrchestrator\\TaskOrchestratorServiceProvider"
+            ]
+        }
+    }
+}

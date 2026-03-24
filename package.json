@@ -1,0 +1,14 @@
+{
+    "name": "malsa-laravel-task-orchestrator",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^5.2.1",
+        "vite": "^6.3.5",
+        "vue": "^3.5.13"
+    }
+}
