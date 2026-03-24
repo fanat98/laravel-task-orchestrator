@@ -17,10 +17,6 @@ npm-debug.log
 yarn-error.log
 pnpm-lock.yaml
 
-# Build output (IMPORTANT for packages)
-
-public/build/
-dist/
 
 # Laravel / PHP
 
