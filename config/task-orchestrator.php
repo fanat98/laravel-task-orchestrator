@@ -36,4 +36,6 @@ return [
     ],
 
     'database_connection' => env('TASK_ORCHESTRATOR_DB_CONNECTION'),
+
+    'discovery_path' => app_path('TaskOrchestrator/discovery.php'),
 ];
