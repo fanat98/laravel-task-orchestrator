@@ -1,0 +1,11 @@
+{
+  "resources/js/app.js": {
+    "file": "task-orchestrator.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "css": [
+      "task-orchestrator.css"
+    ]
+  }
+}
