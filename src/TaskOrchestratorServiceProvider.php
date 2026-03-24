@@ -106,32 +106,38 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
             __DIR__ . '/../public/build' => public_path('vendor/task-orchestrator/build'),
         ], 'task-orchestrator-assets');
 
-
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'task-orchestrator');
 
-        $this->app['router']->aliasMiddleware('task-orchestrator.auth', AuthorizeTaskOrchestrator::class);
+        $this->app['router']->aliasMiddleware(
+            'task-orchestrator.auth',
+            \Malsa\TaskOrchestrator\Http\Middleware\AuthorizeTaskOrchestrator::class
+        );
 
+        $this->registerDiscoveredCommands();
         $this->registerRoutes();
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Malsa\TaskOrchestrator\Console\Commands\RunScheduledTaskCommand::class,
+            ]);
+        }
 
         $this->app->booted(function () {
             if (! $this->app->runningInConsole()) {
                 return;
             }
 
-            $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
-                $tasks = $this->app->make(TaskOrchestratorManager::class);
-                $registrar = $this->app->make(DiscoveredScheduleRegistrar::class);
+            $this->app->afterResolving(
+                \Illuminate\Console\Scheduling\Schedule::class,
+                function (\Illuminate\Console\Scheduling\Schedule $schedule) {
+                    $tasks = $this->app->make(\Malsa\TaskOrchestrator\Support\TaskOrchestratorManager::class);
+                    $registrar = $this->app->make(\Malsa\TaskOrchestrator\Support\DiscoveredScheduleRegistrar::class);
 
-                $registrar->register($schedule, $tasks);
-            });
+                    $registrar->register($schedule, $tasks);
+                }
+            );
         });
-
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                RunScheduledTaskCommand::class,
-            ]);
-        }
     }
 
     protected function registerRoutes(): void
@@ -145,5 +151,29 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
             ->prefix(config('task-orchestrator.route_prefix', 'task-orchestrator'))
             ->as('task-orchestrator.')
             ->group(__DIR__ . '/../routes/web.php');
+    }
+
+    private function registerDiscoveredCommands(): void
+    {
+        $discoveryFile = config('task-orchestrator.discovery_path');
+
+        if (! is_string($discoveryFile) || ! is_file($discoveryFile)) {
+            return;
+        }
+
+        $config = require $discoveryFile;
+
+        if (! is_array($config)) {
+            return;
+        }
+
+        $commands = $config['commands'] ?? [];
+
+        if (! is_array($commands) || $commands === []) {
+            return;
+        }
+
+        $this->app->make(\Malsa\TaskOrchestrator\Support\CommandDiscoveryRegistrar::class)
+            ->register($commands);
     }
 }
