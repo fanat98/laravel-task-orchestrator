@@ -10,6 +10,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Malsa\TaskOrchestrator\Actions\ExecuteTaskRunAction;
+use Malsa\TaskOrchestrator\Domain\Enums\TaskRunStatus;
+use Malsa\TaskOrchestrator\Models\TaskRunRecord;
+use Throwable;
 
 final class ExecuteTaskRunJob implements ShouldQueue
 {
@@ -18,13 +21,50 @@ final class ExecuteTaskRunJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
+    public bool $failOnTimeout = true;
+
     public function __construct(
         public readonly string $taskRunId,
+        public readonly int $timeoutSeconds = 300,
     ) {
     }
 
+    public function timeout(): int
+    {
+        return max($this->timeoutSeconds, 1);
+    }
+
+    /**
+     * @throws Throwable
+     */
     public function handle(ExecuteTaskRunAction $executeTaskRun): void
     {
         $executeTaskRun->execute($this->taskRunId);
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        $run = TaskRunRecord::query()->find($this->taskRunId);
+
+        if (! $run) {
+            return;
+        }
+
+        if (in_array($run->status, [
+            TaskRunStatus::Succeeded->value,
+            TaskRunStatus::Failed->value,
+            TaskRunStatus::Cancelled->value,
+        ], true)) {
+            return;
+        }
+
+        $message = $exception?->getMessage()
+            ?: sprintf('Task run exceeded timeout of %d seconds.', $this->timeoutSeconds);
+
+        $run->update([
+            'status' => TaskRunStatus::Failed->value,
+            'failure_message' => $message,
+            'finished_at' => now(),
+        ]);
     }
 }

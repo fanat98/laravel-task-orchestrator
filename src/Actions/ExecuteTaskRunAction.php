@@ -21,6 +21,9 @@ final class ExecuteTaskRunAction
     ) {
     }
 
+    /**
+     * @throws Throwable
+     */
     public function execute(string $taskRunId): void
     {
         $run = TaskRunRecord::query()->findOrFail($taskRunId);

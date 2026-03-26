@@ -71,7 +71,12 @@ final class StartTaskAction
             'finished_at' => null,
         ]);
 
-        ExecuteTaskRunJob::dispatch($taskRunId);
+        $timeoutSeconds = max(
+            (int) (($definition->timeoutMinutes ?? (int) config('task-orchestrator.stale_run_default_minutes', 10)) * 60),
+            60
+        );
+
+        ExecuteTaskRunJob::dispatch($taskRunId, $timeoutSeconds);
 
         return [
             'run' => new TaskRun(
