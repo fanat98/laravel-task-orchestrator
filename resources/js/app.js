@@ -34,3 +34,40 @@ if (runDetailElement) {
         pollInterval: Number(runDetailElement.dataset.pollInterval || 3000),
     }).mount(runDetailElement)
 }
+
+
+(function () {
+    const KEY = 'task-orchestrator-theme';
+
+    const root = document.documentElement;
+    const toggle = document.getElementById('theme-toggle');
+
+    // Load saved theme
+    const saved = localStorage.getItem(KEY);
+
+    if (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        root.setAttribute('data-theme', 'dark');
+    }
+
+    if (saved) {
+        root.setAttribute('data-theme', saved);
+    }
+
+    if (!toggle) return;
+
+    toggle.addEventListener('click', () => {
+        const current = root.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+
+        root.setAttribute('data-theme', next);
+        localStorage.setItem(KEY, next);
+
+        toggle.textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+
+    // Set initial icon
+    const current = root.getAttribute('data-theme');
+    toggle.textContent = current === 'dark' ? '☀️' : '🌙';
+})();
+
+

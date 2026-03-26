@@ -9,6 +9,7 @@ use Malsa\TaskOrchestrator\Domain\TaskDefinition;
 
 final class DiscoveredTaskDefinitionFactory
 {
+
     /**
      * @param array{
      *     name?: string,
@@ -18,6 +19,7 @@ final class DiscoveredTaskDefinitionFactory
      *     group_order?: int,
      *     order?: int,
      *     depends_on?: array<int, string>,
+     *     timeout_minutes?: int,
      *     schedule?: array{expression?: string, human?: string}
      * } $metadata
      */
@@ -30,6 +32,7 @@ final class DiscoveredTaskDefinitionFactory
         $groupOrder = $metadata['group_order'] ?? null;
         $order = $metadata['order'] ?? null;
         $dependsOn = $metadata['depends_on'] ?? [];
+        $timeoutMinutes = $metadata['timeout_minutes'] ?? null;
         $schedule = $metadata['schedule'] ?? null;
 
         return TaskDefinition::make($name)
@@ -40,6 +43,7 @@ final class DiscoveredTaskDefinitionFactory
             ->groupOrder($groupOrder)
             ->order($order)
             ->dependsOn($dependsOn)
+            ->timeoutMinutes($timeoutMinutes)
             ->schedule($schedule);
     }
 

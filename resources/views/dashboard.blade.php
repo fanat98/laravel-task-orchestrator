@@ -14,14 +14,18 @@
             'task_label' => $run->task_label,
             'command' => $run->command,
             'status' => $run->status,
+            'trigger_type' => $run->trigger_type,
             'started_at' => $run->started_at?->toDateTimeString(),
+            'pipeline_id' => $run->pipeline_id,
         ])->values();
 
         $initialLatestFailedRuns = $latestFailedRuns->map(fn ($run) => [
             'id' => $run->id,
             'task_label' => $run->task_label,
             'failure_message' => $run->failure_message,
+            'trigger_type' => $run->trigger_type,
             'finished_at' => $run->finished_at?->toDateTimeString(),
+            'pipeline_id' => $run->pipeline_id,
         ])->values();
     @endphp
 
@@ -34,6 +38,7 @@
         <div class="nav-actions">
             <a class="button" href="{{ route('task-orchestrator.tasks.index') }}">View tasks</a>
             <a class="button button-secondary" href="{{ route('task-orchestrator.runs.index') }}">View runs</a>
+            <a class="button button-secondary" href="{{ route('task-orchestrator.pipelines.index') }}">View pipelines</a>
         </div>
     </div>
 

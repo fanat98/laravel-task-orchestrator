@@ -3,30 +3,32 @@
 
 # Laravel Task Orchestrator
 
-A lightweight task orchestration dashboard for Laravel applications.
-
-![Dashboard](./docs/dashboard.png)
-
-Run, monitor, and schedule your Artisan commands with a clean UI — inspired by tools like Airflow, but built for Laravel simplicity.
+A lightweight task orchestration layer for Laravel that adds visibility, dependencies, pipelines, and a modern UI on top of your Artisan commands.
 
 ---
 
 ## ✨ Features
 
-* Run Laravel Artisan commands from a web dashboard
-* Real-time logs & progress streaming
-* Queue-based execution (non-blocking)
-* Task scheduling (cron + human-readable)
-* Task grouping and ordering
-* Task dependencies (mini DAG support)
-* Run history with status indicators
-* Live dashboard updates (auto refresh)
-* System health monitoring (queue, stale runs)
-* Flexible authorization (Gate or user field)
+* 🔗 Task dependencies (`depends_on`)
+* 🔄 Automatic pipeline execution (upstream → downstream)
+* 🧠 Task discovery via config file
+* 📊 Dashboard with real-time status
+* 🧩 Pipeline view (visual flow of tasks)
+* 🎯 Manual & scheduled triggers
+* 🟢 Status tracking (queued, running, succeeded, failed)
+* 🧯 Stale run recovery (auto-fail hanging tasks)
+* ⏱ Per-task timeout configuration
+* 🌙 Dark / Light mode
+* 📱 Responsive UI
 
 ---
 
-## 📦 Installation
+## 📸 Screenshots
+![Dashboard](./docs/dashboard.png)
+
+---
+
+## 🚀 Installation
 
 ```bash
 composer require fanat98/laravel-task-orchestrator
@@ -47,53 +49,142 @@ php artisan migrate
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ Basic Configuration
+
+Config file:
 
 ```php
-// config/task-orchestrator.php
+config/task-orchestrator.php
+```
 
+Example:
+
+```php
 return [
     'route_prefix' => 'task-orchestrator',
 
     'middleware' => ['web', 'auth'],
 
     'authorization' => [
-        'enabled' => true,
-
-        // 'gate' or 'user_field'
         'mode' => 'user_field',
+        'field' => 'is_admin',
+    ],
 
-        // used when mode = user_field
-        'user_field' => 'is_admin',
+    'discovery_path' => app_path('TaskOrchestrator/discovery.php'),
 
-        // used when mode = gate
-        'gate' => 'viewTaskOrchestrator',
+    'fail_on_invalid_dependencies' => false,
 
-        'forbidden_message' => 'You do not have permission to access Task Orchestrator.',
+    'stale_run_default_minutes' => 10,
+];
+```
+
+---
+
+## 🧩 Task Discovery
+
+Create:
+
+```bash
+app/TaskOrchestrator/discovery.php
+```
+
+Example:
+
+```php
+<?php
+
+return [
+    'commands' => [
+        'import:control-requirements' => [
+            'name' => 'control-requirements',
+            'label' => 'Import Control Requirements',
+            'group' => 'ETL Imports',
+            'group_order' => 10,
+            'order' => 10,
+            'schedule' => [
+                'expression' => '* * * * *',
+                'human' => 'Every minute',
+            ],
+            'timeout_minutes' => 30,
+        ],
+
+        'import:resources' => [
+            'name' => 'import-resources',
+            'label' => 'Import Resources',
+            'group' => 'ETL Imports',
+            'group_order' => 10,
+            'order' => 20,
+            'depends_on' => ['control-requirements'],
+            'timeout_minutes' => 30,
+        ],
+
+        'import:services' => [
+            'name' => 'import-services',
+            'label' => 'Import Services',
+            'group' => 'ETL Imports',
+            'group_order' => 10,
+            'order' => 30,
+            'depends_on' => ['import-resources'],
+            'timeout_minutes' => 30,
+        ],
+
+        'control-verifications:notify-inactive' => [
+            'name' => 'notify-inactive-control-verifications',
+            'label' => 'Notify inactive control verifications',
+            'group' => 'Control Verifications',
+            'group_order' => 20,
+            'order' => 10,
+            'depends_on' => ['import-services'],
+            'timeout_minutes' => 5,
+        ],
     ],
 ];
 ```
 
 ---
 
-## 🔐 Authorization
+## 🔄 Pipelines
 
-### Option 1 — User field (simple)
+Tasks with dependencies automatically form pipelines:
 
-```php
-'mode' => 'user_field',
-'user_field' => 'is_admin',
+```
+control-requirements → resources → services → notify
 ```
 
-User must have:
+When a task succeeds:
 
-```php
-$user->is_admin === true
-```
+* downstream tasks are triggered automatically
+* all runs are grouped into a pipeline
 
 ---
 
-### Option 2 — Gate (advanced)
+## 🧯 Stale Run Recovery
+
+Recover hanging tasks:
+
+```bash
+php artisan task-orchestrator:recover-stale-runs
+```
+
+Behavior:
+
+* uses per-task `timeout_minutes` if defined
+* otherwise uses global config default
+
+---
+
+## 🔐 Authorization
+
+### Option 1 – User field
+
+```php
+'authorization' => [
+    'mode' => 'user_field',
+    'field' => 'is_admin',
+],
+```
+
+### Option 2 – Gate
 
 ```php
 Gate::define('viewTaskOrchestrator', fn ($user) => $user->is_admin);
@@ -101,148 +192,33 @@ Gate::define('viewTaskOrchestrator', fn ($user) => $user->is_admin);
 
 ---
 
-## 🧠 Defining Tasks
+## 🎨 UI
 
-Tasks are defined in a discovery config file:
-
-```php
-app/TaskOrchestrator/discovery.php
-```
-
-Example:
-
-```php
-return [
-    'commands' => [
-        'import:services' => [
-            'name' => 'import-services',
-            'label' => 'Import Services',
-            'group' => 'ETL Imports',
-            'group_order' => 10,
-            'order' => 10,
-            'schedule' => [
-                'expression' => '0 */3 * * *',
-                'human' => 'Every 3 hours',
-            ],
-        ],
-
-        'import:control-requirements' => [
-            'name' => 'control-requirements',
-            'label' => 'Import Control Requirements',
-            'group' => 'ETL Imports',
-            'order' => 20,
-            'depends_on' => ['import-services'],
-            'schedule' => [
-                'expression' => '0 20 * * *',
-                'human' => 'Daily at 20:00',
-            ],
-        ],
-    ],
-];
-```
-
----
-
-## ⏱ Scheduling
-
-Uses Laravel’s native scheduler.
-
-Run:
-
-```bash
-php artisan schedule:work
-```
-
----
-
-## ▶️ Running Tasks
-
-### From dashboard
-
-Open:
-
-```
-/task-orchestrator
-```
-
----
-
-### From CLI
-
-```bash
-php artisan task-orchestrator:run-task control-requirements
-```
-
----
-
-## 📊 Dashboard
-
-The dashboard provides:
-
+* Dashboard overview
 * Task groups
-* Status badges (success, failed, running)
-* Last & next execution time
-* Task dependencies
-* Run history (last 5 runs)
-* System health overview
+* Pipeline visualization
+* Latest runs
+* Failed runs
+* Dark / Light mode toggle
 
 ---
 
-## 🧩 Task Dependencies
+## 📚 Documentation
 
-Define dependencies between tasks:
+More detailed documentation:
 
-```php
-'depends_on' => ['import-services']
-```
-
-This is visualized in the dashboard and prepares for future workflow execution.
-
----
-
-## 🧪 Queue Requirements
-
-Tasks run via Laravel queues.
-
-Make sure you run:
-
-```bash
-php artisan queue:work
-```
+* [Installation](docs/installation.md)
+* [Configuration](docs/configuration.md)
+* [Task Discovery](docs/discovery.md)
+* [Pipelines](docs/pipelines.md)
+* [Authorization](docs/authorization.md)
 
 ---
 
-## 🧱 Architecture Overview
+## 🛠 Requirements
 
-* Tasks = Laravel Artisan commands
-* Runs = stored in database
-* Execution = queued jobs
-* Logs = streamed + persisted
-* UI = Vue.js (inside the package)
-* Scheduler = Laravel native scheduler
-
----
-
-## 📁 Database Tables
-
-* `task_runs`
-* `task_run_logs`
-
----
-
-## 🚀 Future Improvements
-
-* Full DAG execution (auto-run dependencies)
-* Retry failed tasks
-* Notifications & alerts
-* Parallel pipelines
-* Metrics dashboard
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome!
+* PHP 8.2+
+* Laravel 10 / 11 / 12
 
 ---
 

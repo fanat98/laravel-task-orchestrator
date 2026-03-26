@@ -42,6 +42,7 @@ final class DashboardStatusController
                 'status' => $run->status,
                 'trigger_type' => $run->trigger_type,
                 'started_at' => $run->started_at?->toDateTimeString(),
+                'pipeline_id' => $run->pipeline_id,
             ])
             ->values();
 
@@ -57,6 +58,7 @@ final class DashboardStatusController
                 'failure_message' => $run->failure_message,
                 'trigger_type' => $run->trigger_type,
                 'finished_at' => $run->finished_at?->toDateTimeString(),
+                'pipeline_id' => $run->pipeline_id,
             ])
             ->values();
 
@@ -101,6 +103,7 @@ final class DashboardStatusController
                                     'trigger_type' => $run->trigger_type,
                                     'started_at' => $run->started_at?->toDateTimeString(),
                                     'finished_at' => $run->finished_at?->toDateTimeString(),
+                                    'pipeline_id' => $run->pipeline_id,
                                 ])
                                 ->values();
 

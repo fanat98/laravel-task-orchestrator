@@ -15,6 +15,7 @@
             'started_at' => $run->started_at?->toDateTimeString(),
             'finished_at' => $run->finished_at?->toDateTimeString(),
             'trigger_type' => $run->trigger_type,
+            'pipeline_id' => $run->pipeline_id,
         ];
 
         $initialLogs = $run->logs->map(fn ($log) => [
