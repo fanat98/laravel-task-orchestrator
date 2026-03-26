@@ -22,7 +22,11 @@ final class StartTaskAction
     /**
      * @return array{run: TaskRun, context: TaskContext, record: TaskRunRecord}
      */
-    public function execute(string $taskName, string $triggerType = 'manual'): array
+    public function execute(
+        string $taskName,
+        string $triggerType = 'manual',
+        ?string $pipelineId = null,
+    ): array
     {
         $definition = $this->tasks->find($taskName);
 
@@ -37,6 +41,23 @@ final class StartTaskAction
 
         $taskRunId = (string) Str::uuid();
 
+        if (! $definition->allowConcurrentRuns) {
+            $existingQueuedOrRunning = TaskRunRecord::query()
+                ->where('task_name', $definition->name)
+                ->whereIn('status', [
+                    TaskRunStatus::Queued->value,
+                    TaskRunStatus::Running->value,
+                ])
+                ->exists();
+
+            if ($existingQueuedOrRunning) {
+                throw new \RuntimeException(sprintf(
+                    'Task "%s" is already queued or running.',
+                    $definition->name
+                ));
+            }
+        }
+
         $record = TaskRunRecord::query()->create([
             'id' => $taskRunId,
             'task_name' => $definition->name,
@@ -45,6 +66,7 @@ final class StartTaskAction
             'command_arguments' => $definition->arguments,
             'status' => TaskRunStatus::Queued->value,
             'trigger_type' => $triggerType,
+            'pipeline_id' => $pipelineId,
             'started_at' => null,
             'finished_at' => null,
         ]);

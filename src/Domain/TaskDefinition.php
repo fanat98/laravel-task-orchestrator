@@ -25,6 +25,7 @@ final class TaskDefinition
         public readonly ?int $order,
         public readonly ?array $schedule,
         public readonly array $dependsOn,
+        public readonly ?int $timeoutMinutes,
         public readonly bool $allowManualRun,
         public readonly bool $allowConcurrentRuns,
     ) {
@@ -50,6 +51,7 @@ final class TaskDefinition
             order: null,
             schedule: null,
             dependsOn: [],
+            timeoutMinutes: null,
             allowManualRun: true,
             allowConcurrentRuns: false,
         );
@@ -68,6 +70,7 @@ final class TaskDefinition
             order: $this->order,
             schedule: $this->schedule,
             dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
         );
@@ -86,6 +89,7 @@ final class TaskDefinition
             order: $this->order,
             schedule: $this->schedule,
             dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
         );
@@ -104,6 +108,7 @@ final class TaskDefinition
             order: $this->order,
             schedule: $this->schedule,
             dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
         );
@@ -125,6 +130,7 @@ final class TaskDefinition
             order: $this->order,
             schedule: $this->schedule,
             dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
         );
@@ -143,6 +149,7 @@ final class TaskDefinition
             order: $this->order,
             schedule: $this->schedule,
             dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
         );
@@ -161,6 +168,7 @@ final class TaskDefinition
             order: $this->order,
             schedule: $this->schedule,
             dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
         );
@@ -179,6 +187,7 @@ final class TaskDefinition
             order: $order,
             schedule: $this->schedule,
             dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
         );
@@ -203,6 +212,7 @@ final class TaskDefinition
             order: $this->order,
             schedule: $schedule,
             dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
         );
@@ -224,6 +234,26 @@ final class TaskDefinition
             order: $this->order,
             schedule: $this->schedule,
             dependsOn: $dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
+            allowManualRun: $this->allowManualRun,
+            allowConcurrentRuns: $this->allowConcurrentRuns,
+        );
+    }
+
+    public function timeoutMinutes(?int $timeoutMinutes): self
+    {
+        return new self(
+            name: $this->name,
+            label: $this->label,
+            description: $this->description,
+            command: $this->command,
+            arguments: $this->arguments,
+            group: $this->group,
+            groupOrder: $this->groupOrder,
+            order: $this->order,
+            schedule: $this->schedule,
+            dependsOn: $this->dependsOn,
+            timeoutMinutes: $timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
         );
@@ -242,6 +272,7 @@ final class TaskDefinition
             order: $this->order,
             schedule: $this->schedule,
             dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
         );
@@ -260,6 +291,7 @@ final class TaskDefinition
             order: $this->order,
             schedule: $this->schedule,
             dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $allowConcurrentRuns,
         );

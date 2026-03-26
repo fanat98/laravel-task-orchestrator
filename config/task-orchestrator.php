@@ -36,6 +36,7 @@ return [
     ],
 
     'database_connection' => env('TASK_ORCHESTRATOR_DB_CONNECTION'),
-
     'discovery_path' => app_path('TaskOrchestrator/discovery.php'),
+    'fail_on_invalid_dependencies' => false,
+    'stale_run_default_minutes' => 10,
 ];

@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace Malsa\TaskOrchestrator;
 
-use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\ServiceProvider;
 use Malsa\TaskOrchestrator\Actions\ExecuteTaskRunAction;
 use Malsa\TaskOrchestrator\Actions\RetryTaskRunAction;
+use Malsa\TaskOrchestrator\Actions\StartDownstreamTasksAction;
 use Malsa\TaskOrchestrator\Actions\StartTaskAction;
-use Malsa\TaskOrchestrator\Console\Commands\RunScheduledTaskCommand;
+use Malsa\TaskOrchestrator\Actions\StartTaskChainAction;
 use Malsa\TaskOrchestrator\Contracts\TaskRegistry;
-use Malsa\TaskOrchestrator\Http\Middleware\AuthorizeTaskOrchestrator;
 use Malsa\TaskOrchestrator\Registry\InMemoryTaskRegistry;
 use Malsa\TaskOrchestrator\Support\CommandDiscoveryRegistrar;
 use Malsa\TaskOrchestrator\Support\CurrentTaskRunStore;
 use Malsa\TaskOrchestrator\Support\DiscoveredScheduleRegistrar;
 use Malsa\TaskOrchestrator\Support\DiscoveredTaskDefinitionFactory;
 use Malsa\TaskOrchestrator\Support\SystemHealthInspector;
+use Malsa\TaskOrchestrator\Support\TaskDependencyCompletionGuard;
+use Malsa\TaskOrchestrator\Support\TaskDependencyResolver;
+use Malsa\TaskOrchestrator\Support\TaskDependencyValidator;
+use Malsa\TaskOrchestrator\Support\TaskDownstreamResolver;
 use Malsa\TaskOrchestrator\Support\TaskOrchestratorManager;
 use Malsa\TaskOrchestrator\Support\TaskProgressUpdater;
 use Malsa\TaskOrchestrator\Support\TaskScheduleCalculator;
@@ -65,7 +69,8 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
         $this->app->singleton(ExecuteTaskRunAction::class, function ($app): ExecuteTaskRunAction {
             return new ExecuteTaskRunAction(
                 $app->make(\Illuminate\Contracts\Console\Kernel::class),
-                $app->make(CurrentTaskRunStore::class)
+                $app->make(CurrentTaskRunStore::class),
+                $app->make(StartDownstreamTasksAction::class),
             );
         });
 
@@ -94,6 +99,37 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
         $this->app->singleton(DiscoveredScheduleRegistrar::class, function () {
             return new DiscoveredScheduleRegistrar();
         });
+
+        $this->app->singleton(TaskDependencyResolver::class, function ($app): TaskDependencyResolver {
+            return new TaskDependencyResolver(
+                $app->make(TaskOrchestratorManager::class)
+            );
+        });
+
+        $this->app->singleton(StartTaskChainAction::class, function ($app): StartTaskChainAction {
+            return new StartTaskChainAction(
+                $app->make(TaskDependencyResolver::class),
+                $app->make(StartTaskAction::class),
+            );
+        });
+
+        $this->app->singleton(TaskDownstreamResolver::class, function ($app): TaskDownstreamResolver {
+            return new TaskDownstreamResolver(
+                $app->make(TaskOrchestratorManager::class)
+            );
+        });
+
+        $this->app->singleton(StartDownstreamTasksAction::class, function ($app): StartDownstreamTasksAction {
+            return new StartDownstreamTasksAction(
+                $app->make(TaskDownstreamResolver::class),
+                $app->make(TaskDependencyCompletionGuard::class),
+                $app->make(StartTaskAction::class),
+            );
+        });
+
+        $this->app->singleton(TaskDependencyCompletionGuard::class, function (): TaskDependencyCompletionGuard {
+            return new TaskDependencyCompletionGuard();
+        });
     }
 
     public function boot(): void
@@ -120,6 +156,7 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 \Malsa\TaskOrchestrator\Console\Commands\RunScheduledTaskCommand::class,
+                \Malsa\TaskOrchestrator\Console\Commands\RecoverStaleTaskRunsCommand::class,
             ]);
         }
 
@@ -135,9 +172,19 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
                     $registrar = $this->app->make(\Malsa\TaskOrchestrator\Support\DiscoveredScheduleRegistrar::class);
 
                     $registrar->register($schedule, $tasks);
+
+                    $schedule->command('task-orchestrator:recover-stale-runs --minutes=10')
+                        ->everyTenMinutes()
+                        ->withoutOverlapping();
                 }
             );
         });
+
+        $this->app->singleton(TaskDependencyValidator::class, function (): TaskDependencyValidator {
+            return new TaskDependencyValidator();
+        });
+
+
     }
 
     protected function registerRoutes(): void
@@ -153,6 +200,9 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
             ->group(__DIR__ . '/../routes/web.php');
     }
 
+    /**
+     * @throws BindingResolutionException
+     */
     private function registerDiscoveredCommands(): void
     {
         $discoveryFile = config('task-orchestrator.discovery_path');
@@ -175,5 +225,18 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
 
         $this->app->make(\Malsa\TaskOrchestrator\Support\CommandDiscoveryRegistrar::class)
             ->register($commands);
+
+        try {
+            $this->app->make(TaskDependencyValidator::class)
+                ->validate(
+                    $this->app->make(\Malsa\TaskOrchestrator\Support\TaskOrchestratorManager::class)->all()
+                );
+        } catch (\Throwable $exception) {
+            if (config('task-orchestrator.fail_on_invalid_dependencies', false)) {
+                throw $exception;
+            }
+
+            report($exception);
+        }
     }
 }

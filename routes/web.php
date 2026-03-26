@@ -42,3 +42,6 @@ Route::get('/api/runs/{taskRun}/logs', TaskRunLogsController::class)
 
 Route::get('/api/dashboard', \Malsa\TaskOrchestrator\Http\Controllers\DashboardStatusController::class)
     ->name('api.dashboard');
+
+Route::get('/pipelines', \Malsa\TaskOrchestrator\Http\Controllers\PipelineIndexController::class)
+    ->name('pipelines.index');

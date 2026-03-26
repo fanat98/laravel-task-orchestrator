@@ -17,6 +17,7 @@ final class ExecuteTaskRunAction
     public function __construct(
         private readonly Kernel $artisan,
         private readonly CurrentTaskRunStore $currentTaskRunStore,
+        private readonly StartDownstreamTasksAction $startDownstreamTasks,
     ) {
     }
 
@@ -67,10 +68,20 @@ final class ExecuteTaskRunAction
                 ),
                 'finished_at' => now(),
             ]);
+
+            if ($exitCode === 0) {
+                $this->startDownstreamTasks->execute($run->task_name, $run->pipeline_id);
+            }
         } catch (Throwable $exception) {
             $output->flushRemainingBuffer();
 
-            $context->log($exception->getMessage(), 'error');
+            $context->log(sprintf(
+                '%s: %s',
+                $exception::class,
+                $exception->getMessage()
+            ), 'error');
+
+            $context->log($exception->getTraceAsString(), 'error');
 
             $progress = $context->progress();
 

@@ -74,19 +74,19 @@
                                             v-if="task.last_status"
                                             :class="['status-badge', `status-${task.last_status}`]"
                                         >
-            {{ capitalize(task.last_status) }}
-        </span>
+                                            {{ capitalize(task.last_status) }}
+                                        </span>
                                     </div>
 
                                     <!-- Badges -->
                                     <div class="task-badges">
-        <span v-if="task.schedule?.human || task.schedule?.expression" class="badge badge-schedule">
-            ⏱ {{ task.schedule?.human ?? task.schedule?.expression }}
-        </span>
+                                        <span v-if="task.schedule?.human || task.schedule?.expression" class="badge badge-schedule">
+                                            ⏱ {{ task.schedule?.human ?? task.schedule?.expression }}
+                                        </span>
 
-                                        <span class="badge badge-trigger">
-            ⚡ {{ capitalize(task.last_trigger_type ?? 'manual') }}
-        </span>
+                                        <span :class="['badge', 'badge-trigger', triggerBadgeClass(task.last_trigger_type)]">
+                                            ⚡ {{ triggerLabel(task.last_trigger_type) }}
+                                        </span>
                                     </div>
 
                                     <div v-if="task.depends_on?.length" class="task-dependencies">
@@ -96,14 +96,14 @@
                                             :key="dependency"
                                             class="badge badge-dependency"
                                         >
-        {{ dependency }}
-    </span>
+                                            {{ dependency }}
+                                        </span>
                                     </div>
 
                                     <!-- Meta -->
                                     <div class="group-task-submeta">
-                                        <span>Next: {{ task.next_run ?? '—' }}</span>
-                                        <span>Last: {{ task.last_run ?? '—' }}</span>
+                                        <span>⏱ Next: {{ task.next_run ?? '—' }}</span>
+                                        <span>✔ Last: {{ task.last_run ?? '—' }}</span>
                                     </div>
 
                                     <!-- History -->
@@ -131,7 +131,13 @@
                                         :action="buildTaskRunUrl(task.name)"
                                     >
                                         <input type="hidden" name="_token" :value="csrfToken">
-                                        <button class="button button-small" type="submit">Run</button>
+                                        <button
+                                            class="button button-small button-primary"
+                                            type="submit"
+                                            title="Run task"
+                                        >
+                                            ▶
+                                        </button>
                                     </form>
                                 </div>
                             </div>
@@ -172,7 +178,11 @@
                                 {{ capitalize(run.status) }}
                             </span>
                         </td>
-                        <td>{{ capitalize(run.trigger_type ?? 'manual') }}</td>
+                        <td>
+                            <span :class="['badge', triggerBadgeClass(run.trigger_type)]">
+                                {{ triggerLabel(run.trigger_type) }}
+                            </span>
+                        </td>
                         <td>{{ run.started_at ?? '—' }}</td>
                     </tr>
                     </tbody>
@@ -205,7 +215,11 @@
                         </td>
                         <td>{{ run.task_label }}</td>
                         <td class="truncate">{{ run.failure_message ?? '—' }}</td>
-                        <td>{{ capitalize(run.trigger_type ?? 'manual') }}</td>
+                        <td>
+                            <span :class="['badge', triggerBadgeClass(run.trigger_type)]">
+                                {{ triggerLabel(run.trigger_type) }}
+                            </span>
+                        </td>
                         <td>{{ run.finished_at ?? '—' }}</td>
                     </tr>
                     </tbody>
@@ -250,6 +264,29 @@ function buildRunHistoryTitle(run) {
 function capitalize(value) {
     if (!value) return ''
     return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+function triggerLabel(value) {
+    if (!value) {
+        return 'Unknown'
+    }
+
+    return capitalize(value)
+}
+
+function triggerBadgeClass(value) {
+    switch (value) {
+        case 'scheduled':
+            return 'badge-trigger-scheduled'
+        case 'pipeline':
+            return 'badge-trigger-pipeline'
+        case 'retry':
+            return 'badge-trigger-retry'
+        case 'manual':
+            return 'badge-trigger-manual'
+        default:
+            return 'badge-trigger-default'
+    }
 }
 
 function buildRunUrl(runId) {

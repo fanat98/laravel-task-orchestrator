@@ -48,6 +48,17 @@
                     <div class="detail-label">ID</div>
                     <div>{{ run.id }}</div>
 
+                    <div class="detail-label">Pipeline</div>
+                    <div>
+                        <span v-if="run.pipeline_id" class="badge badge-trigger-pipeline">
+                            Pipeline run
+                        </span>
+                        <span v-else>—</span>
+                        <div v-if="run.pipeline_id" class="muted" style="margin-top: 0.35rem;">
+                            {{ run.pipeline_id }}
+                        </div>
+                    </div>
+
                     <div class="detail-label">Task Name</div>
                     <div>{{ run.task_name }}</div>
 
@@ -64,7 +75,11 @@
                         </span>
                     </div>
                     <div class="detail-label">Trigger Type</div>
-                    <div>{{ capitalize(run.trigger_type ?? 'manual') }}</div>
+                    <div>
+                        <span :class="['badge', triggerBadgeClass(run.trigger_type)]">
+                            {{ triggerLabel(run.trigger_type) }}
+                        </span>
+                    </div>
 
                     <div class="detail-label">Started At</div>
                     <div>{{ run.started_at ?? '—' }}</div>
@@ -76,7 +91,7 @@
                     <div v-html="renderProgress(run)"></div>
 
                     <div class="detail-label">Failure Message</div>
-                    <div class="truncate">{{ run.failure_message ?? '—' }}</div>
+                    <div class="no-truncate">{{ run.failure_message ?? '—' }}</div>
                 </div>
             </div>
 
@@ -102,7 +117,7 @@
                             <div class="log-meta">
                                 [{{ log.level }}] {{ log.created_at ?? '' }}
                             </div>
-                            <div class="truncate">{{ log.message }}</div>
+                            <div class="no-truncate">{{ log.message }}</div>
                         </div>
                     </div>
                 </div>
@@ -164,6 +179,29 @@ function capitalize(value) {
     }
 
     return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+function triggerLabel(value) {
+    if (!value) {
+        return 'Unknown'
+    }
+
+    return capitalize(value)
+}
+
+function triggerBadgeClass(value) {
+    switch (value) {
+        case 'scheduled':
+            return 'badge-trigger-scheduled'
+        case 'pipeline':
+            return 'badge-trigger-pipeline'
+        case 'retry':
+            return 'badge-trigger-retry'
+        case 'manual':
+            return 'badge-trigger-manual'
+        default:
+            return 'badge-trigger-default'
+    }
 }
 
 function renderProgress(data) {

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Malsa\TaskOrchestrator\Support;
 
-final class CommandDiscoveryRegistrar
+final readonly class CommandDiscoveryRegistrar
 {
     public function __construct(
-        private readonly TaskOrchestratorManager $tasks,
-        private readonly DiscoveredTaskDefinitionFactory $factory,
+        private TaskOrchestratorManager         $tasks,
+        private DiscoveredTaskDefinitionFactory $factory,
     ) {
     }
 
@@ -21,6 +21,7 @@ final class CommandDiscoveryRegistrar
      *     group_order?: int,
      *     order?: int,
      *     depends_on?: array<int, string>,
+     *     timeout_minutes?: int,
      *     schedule?: array{expression?: string, human?: string}
      * }> $commands
      */
@@ -35,7 +36,7 @@ final class CommandDiscoveryRegistrar
         }
     }
 
-    /**
+     /**
      * @param int|string $key
      * @param string|array{
      *     name?: string,
@@ -45,6 +46,7 @@ final class CommandDiscoveryRegistrar
      *     group_order?: int,
      *     order?: int,
      *     depends_on?: array<int, string>,
+      *    timeout_minutes?: int,
      *     schedule?: array{expression?: string, human?: string}
      * } $value
      * @return array{0: string, 1: array{
@@ -55,6 +57,7 @@ final class CommandDiscoveryRegistrar
      *     group_order?: int,
      *     order?: int,
      *     depends_on?: array<int, string>,
+      *    timeout_minutes?: int,
      *     schedule?: array{expression?: string, human?: string}
      * }}
      */

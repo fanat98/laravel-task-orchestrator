@@ -26,6 +26,7 @@ final class TaskRunStatusController
             'trigger_type' => $run->trigger_type,
             'started_at' => $run->started_at?->toDateTimeString(),
             'finished_at' => $run->finished_at?->toDateTimeString(),
+            'pipeline_id' => $run->pipeline_id,
         ]);
     }
 }

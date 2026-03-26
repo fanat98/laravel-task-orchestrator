@@ -24,44 +24,70 @@
         <div class="panel">
             <div class="panel-header">Failure Queue</div>
 
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Task</th>
-                    <th>Label</th>
-                    <th>Command</th>
-                    <th>Status</th>
-                    <th>Failure</th>
-                    <th>Started</th>
-                    <th>Finished</th>
-                    <th>Trigger</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach ($runs as $run)
+            <div class="table-wrap">
+                <table class="table-compact">
+                    <thead>
                     <tr>
-                        <td>
-                            <a href="{{ route('task-orchestrator.runs.show', $run->id) }}">
-                                {{ $run->id }}
-                            </a>
-                        </td>
-                        <td>{{ $run->task_name }}</td>
-                        <td>{{ $run->task_label }}</td>
-                        <td>{{ $run->command }}</td>
-                        <td>
-                            <span class="status-badge status-failed">
-                                {{ ucfirst($run->status) }}
-                            </span>
-                        </td>
-                        <td class="truncate">{{ $run->failure_message ?: '—' }}</td>
-                        <td>{{ $run->started_at?->format('Y-m-d H:i:s') }}</td>
-                        <td>{{ $run->finished_at?->format('Y-m-d H:i:s') ?? '—' }}</td>
-                        <td>{{ ucfirst($run->trigger_type ?? 'manual') }}</td>
+                        <th>ID</th>
+                        <th>Task</th>
+                        <th>Trigger</th>
+                        <th>Failure</th>
+                        <th class="hide-sm">Finished</th>
+                        <th>Action</th>
                     </tr>
-                @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    @forelse ($runs as $run)
+                        <tr>
+                            <td>
+                                <a href="{{ route('task-orchestrator.runs.show', $run->id) }}">
+                                    {{ $run->id }}
+                                </a>
+                            </td>
+
+                            <td title="{{ $run->task_label }}">
+                                {{ $run->task_label }}
+                            </td>
+
+                            <td>
+                        <span class="badge
+                            @if (($run->trigger_type ?? 'manual') === 'scheduled') badge-trigger-scheduled
+                            @elseif (($run->trigger_type ?? 'manual') === 'pipeline') badge-trigger-pipeline
+                            @elseif (($run->trigger_type ?? 'manual') === 'retry') badge-trigger-retry
+                            @elseif (($run->trigger_type ?? 'manual') === 'manual') badge-trigger-manual
+                            @else badge-trigger-default
+                            @endif
+                        ">
+                            {{ ucfirst($run->trigger_type ?? 'manual') }}
+                        </span>
+                            </td>
+
+                            <td class="wrap-text">
+                                {{ $run->failure_message ?: '—' }}
+                            </td>
+
+                            <td class="hide-sm">
+                                {{ $run->finished_at?->format('Y-m-d H:i:s') ?? '—' }}
+                            </td>
+
+                            <td class="table-actions">
+                                <a
+                                    class="button button-small button-primary"
+                                    href="{{ route('task-orchestrator.runs.show', $run->id) }}"
+                                    title="Open run details"
+                                >
+                                    ↗ View
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="table-cell-muted">No failed runs found.</td>
+                        </tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div style="margin-top: 1rem;">
