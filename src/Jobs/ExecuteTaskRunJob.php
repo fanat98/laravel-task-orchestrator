@@ -22,16 +22,13 @@ final class ExecuteTaskRunJob implements ShouldQueue
     use SerializesModels;
 
     public bool $failOnTimeout = true;
+    public int $timeout;
 
     public function __construct(
         public readonly string $taskRunId,
         public readonly int $timeoutSeconds = 300,
     ) {
-    }
-
-    public function timeout(): int
-    {
-        return max($this->timeoutSeconds, 1);
+        $this->timeout = max($timeoutSeconds, 1);
     }
 
     /**
@@ -59,7 +56,7 @@ final class ExecuteTaskRunJob implements ShouldQueue
         }
 
         $message = $exception?->getMessage()
-            ?: sprintf('Task run exceeded timeout of %d seconds.', $this->timeoutSeconds);
+            ?: sprintf('Task run exceeded timeout of %d seconds.', $this->timeout);
 
         $run->update([
             'status' => TaskRunStatus::Failed->value,
