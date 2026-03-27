@@ -5,31 +5,42 @@ declare(strict_types=1);
 namespace Malsa\TaskOrchestrator\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
-use Malsa\TaskOrchestrator\Models\TaskRunRecord;
 use Malsa\TaskOrchestrator\Support\TaskOrchestratorManager;
 use Malsa\TaskOrchestrator\Support\TaskScheduleCalculator;
+use Malsa\TaskOrchestrator\Support\TaskStartabilityStateResolver;
 
 final class TaskIndexController
 {
     public function __invoke(
         TaskOrchestratorManager $tasks,
         TaskScheduleCalculator $scheduleCalculator,
+        TaskStartabilityStateResolver $startabilityResolver,
     ): View {
-        $taskItems = $tasks->all()
+        $allTasks = $tasks->all();
+
+        $activeRunsByTask = $startabilityResolver->activeRunsByTaskName(
+            $allTasks->pluck('name')->all()
+        );
+        $latestRunsByTask = $startabilityResolver->latestRunsByTaskName(
+            $allTasks->pluck('name')->all()
+        );
+
+        $taskItems = $allTasks
             ->sortBy(fn ($task) => [
                 $task->groupOrder ?? 999999,
                 $task->group ?? 'Ungrouped',
                 $task->order ?? 999999,
                 $task->label,
             ])
-            ->map(function ($task) use ($scheduleCalculator) {
-            $lastRun = TaskRunRecord::query()
-                ->where('task_name', $task->name)
-                ->latest('started_at')
-                ->latest('created_at')
-                ->first();
+            ->map(function ($task) use ($scheduleCalculator, $startabilityResolver, $activeRunsByTask, $latestRunsByTask) {
+            $lastRun = $latestRunsByTask[$task->name] ?? null;
 
             $nextRun = $scheduleCalculator->nextRun($task->schedule);
+            $startabilityState = $startabilityResolver->stateFor(
+                $task,
+                $activeRunsByTask,
+                $latestRunsByTask,
+            );
 
                 return [
                     'name' => $task->name,
@@ -46,6 +57,13 @@ final class TaskIndexController
                     'last_run' => $lastRun?->started_at,
                     'last_status' => $lastRun?->status,
                     'last_trigger_type' => $lastRun?->trigger_type,
+                    'is_queued' => $startabilityState['is_queued'],
+                    'is_running' => $startabilityState['is_running'],
+                    'is_blocked_by_dependencies' => $startabilityState['is_blocked_by_dependencies'],
+                    'blocked_by_task_names' => $startabilityState['blocked_by_task_names'],
+                    'start_block_reason' => $startabilityState['start_block_reason'],
+                    'can_start' => $startabilityState['can_start'],
+                    'active_run_id' => $startabilityState['active_run_id'],
                 ];
         });
 

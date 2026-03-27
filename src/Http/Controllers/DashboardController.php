@@ -10,6 +10,7 @@ use Malsa\TaskOrchestrator\Models\TaskRunRecord;
 use Malsa\TaskOrchestrator\Support\SystemHealthInspector;
 use Malsa\TaskOrchestrator\Support\TaskOrchestratorManager;
 use Malsa\TaskOrchestrator\Support\TaskScheduleCalculator;
+use Malsa\TaskOrchestrator\Support\TaskStartabilityStateResolver;
 
 final class DashboardController
 {
@@ -17,8 +18,17 @@ final class DashboardController
         TaskOrchestratorManager $tasks,
         SystemHealthInspector $healthInspector,
         TaskScheduleCalculator $scheduleCalculator,
+        TaskStartabilityStateResolver $startabilityResolver,
     ): View {
-        $registeredTasksCount = $tasks->all()->count();
+        $allTasks = $tasks->all();
+        $registeredTasksCount = $allTasks->count();
+
+        $activeRunsByTask = $startabilityResolver->activeRunsByTaskName(
+            $allTasks->pluck('name')->all()
+        );
+        $latestRunsByTask = $startabilityResolver->latestRunsByTaskName(
+            $allTasks->pluck('name')->all()
+        );
 
         $totalRuns = TaskRunRecord::query()->count();
 
@@ -43,7 +53,7 @@ final class DashboardController
             ->limit(5)
             ->get();
 
-        $groupedTasks = $tasks->all()
+        $groupedTasks = $allTasks
             ->sortBy(fn ($task) => [
                 $task->groupOrder ?? 999999,
                 $task->order ?? 999999,
@@ -52,7 +62,7 @@ final class DashboardController
             ->groupBy(fn ($task) => $task->group ?: 'Ungrouped');
 
         $taskGroups = $groupedTasks
-            ->map(function ($groupTasks, $groupName) use ($scheduleCalculator) {
+            ->map(function ($groupTasks, $groupName) use ($scheduleCalculator, $startabilityResolver, $activeRunsByTask, $latestRunsByTask) {
                 $firstTask = $groupTasks->first();
 
                 return [
@@ -63,14 +73,15 @@ final class DashboardController
                             $task->order ?? 999999,
                             $task->label,
                         ])
-                        ->map(function ($task) use ($scheduleCalculator) {
-                            $lastRun = TaskRunRecord::query()
-                                ->where('task_name', $task->name)
-                                ->latest('started_at')
-                                ->latest('created_at')
-                                ->first();
+                        ->map(function ($task) use ($scheduleCalculator, $startabilityResolver, $activeRunsByTask, $latestRunsByTask) {
+                            $lastRun = $latestRunsByTask[$task->name] ?? null;
 
                             $nextRun = $scheduleCalculator->nextRun($task->schedule);
+                            $startabilityState = $startabilityResolver->stateFor(
+                                $task,
+                                $activeRunsByTask,
+                                $latestRunsByTask,
+                            );
 
                             $recentRuns = TaskRunRecord::query()
                                 ->where('task_name', $task->name)
@@ -99,6 +110,13 @@ final class DashboardController
                                 'last_status' => $lastRun?->status,
                                 'last_trigger_type' => $lastRun?->trigger_type,
                                 'allow_manual_run' => $task->allowManualRun,
+                                'is_queued' => $startabilityState['is_queued'],
+                                'is_running' => $startabilityState['is_running'],
+                                'is_blocked_by_dependencies' => $startabilityState['is_blocked_by_dependencies'],
+                                'blocked_by_task_names' => $startabilityState['blocked_by_task_names'],
+                                'start_block_reason' => $startabilityState['start_block_reason'],
+                                'can_start' => $startabilityState['can_start'],
+                                'active_run_id' => $startabilityState['active_run_id'],
                                 'recent_runs' => $recentRuns,
                                 'depends_on' => $task->dependsOn,
                             ];

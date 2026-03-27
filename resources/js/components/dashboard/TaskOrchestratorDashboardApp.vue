@@ -134,11 +134,13 @@
                                         <button
                                             class="button button-small button-primary"
                                             type="submit"
-                                            title="Run task"
+                                            :disabled="!task.can_start"
+                                            :title="startButtonTitle(task)"
                                         >
                                             ▶
                                         </button>
                                     </form>
+
                                 </div>
                             </div>
                         </div>
@@ -287,6 +289,27 @@ function triggerBadgeClass(value) {
         default:
             return 'badge-trigger-default'
     }
+}
+
+function startButtonTitle(task) {
+    if (task.can_start) {
+        return 'Run task'
+    }
+
+    if (task.is_running) {
+        return 'Task is already running'
+    }
+
+    if (task.is_queued) {
+        return 'Task is already queued'
+    }
+
+    if (task.is_blocked_by_dependencies) {
+        const blocked = (task.blocked_by_task_names || []).join(', ')
+        return blocked ? `Blocked by dependencies: ${blocked}` : 'Blocked by dependencies'
+    }
+
+    return 'Task cannot be started'
 }
 
 function buildRunUrl(runId) {

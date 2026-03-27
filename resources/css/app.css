@@ -214,6 +214,20 @@ a:hover {
     transform: translateY(-1px);
 }
 
+.button:disabled,
+.button[disabled] {
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none;
+    background: #9ca3af;
+}
+
+.button:disabled:hover,
+.button[disabled]:hover {
+    transform: none;
+    background: #9ca3af;
+}
+
 .button-secondary {
     background: #111827;
 }
@@ -236,6 +250,7 @@ a:hover {
     font-size: 0.8rem;
     border-radius: 8px;
 }
+
 
 /* Tables */
 
@@ -286,6 +301,13 @@ th {
 
 .table-actions {
     white-space: nowrap;
+}
+
+
+.group-task-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
 }
 
 .pagination-wrap {
@@ -372,6 +394,13 @@ th {
 
 .table-actions form {
     margin: 0;
+}
+
+.task-start-state {
+    margin-top: 0.45rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 table tr {

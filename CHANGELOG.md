@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 
 ---
+## [Unreleased]
+
+### Added
+- Centralized task start blocking evaluator (`TaskStartBlockingEvaluator`) reused by UI state and backend guard logic.
+- Dependency-aware startability metadata in task payloads:
+    - `is_blocked_by_dependencies`
+    - `blocked_by_task_names`
+    - `start_block_reason`
+    - `can_start`
+
+### Changed
+- `StartTaskAction` now enforces dependency-based blocking through the centralized backend guard path.
+- Stale-run recovery scheduler registration now runs without hardcoded `--minutes` override to respect task-specific timeouts.
+
+### Fixed
+- Prevented duplicate task starts across trigger paths when dependencies are active or not in a succeeded state.
+- Disabled run buttons consistently when backend startability state is false in task list and dashboard views.
+- Removed duplicate or unclear run-state helper actions in the UI and simplified button states.
+- Replaced mixed pagination rendering with a single package-styled pagination component.
+
 ## [1.2.0] - 2026-03-27
 
 ### Added

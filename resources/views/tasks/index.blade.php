@@ -89,11 +89,13 @@
                                     <button
                                         class="button button-small button-primary"
                                         type="submit"
-                                        title="Run task"
+                                        @disabled(! $task['can_start'])
+                                        title="{{ $task['can_start'] ? 'Run task' : ($task['is_running'] ? 'Task is already running' : ($task['is_queued'] ? 'Task is already queued' : ($task['is_blocked_by_dependencies'] ? 'Blocked by dependencies: '.implode(', ', $task['blocked_by_task_names']) : 'Task cannot be started'))) }}"
                                     >
                                         ▶
                                     </button>
                                 </form>
+
                             @else
                                 <span class="muted">Disabled</span>
                             @endif

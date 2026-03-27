@@ -17,7 +17,9 @@ use Malsa\TaskOrchestrator\Support\CommandDiscoveryRegistrar;
 use Malsa\TaskOrchestrator\Support\CurrentTaskRunStore;
 use Malsa\TaskOrchestrator\Support\DiscoveredScheduleRegistrar;
 use Malsa\TaskOrchestrator\Support\DiscoveredTaskDefinitionFactory;
+use Malsa\TaskOrchestrator\Support\ExecutionBlockingGuard;
 use Malsa\TaskOrchestrator\Support\SystemHealthInspector;
+use Malsa\TaskOrchestrator\Support\TaskStartBlockingEvaluator;
 use Malsa\TaskOrchestrator\Support\TaskDependencyCompletionGuard;
 use Malsa\TaskOrchestrator\Support\TaskDependencyResolver;
 use Malsa\TaskOrchestrator\Support\TaskDependencyValidator;
@@ -45,7 +47,18 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
 
         $this->app->singleton(StartTaskAction::class, function ($app): StartTaskAction {
             return new StartTaskAction(
-                $app->make(TaskOrchestratorManager::class)
+                $app->make(TaskOrchestratorManager::class),
+                $app->make(ExecutionBlockingGuard::class)
+            );
+        });
+
+        $this->app->singleton(TaskStartBlockingEvaluator::class, function (): TaskStartBlockingEvaluator {
+            return new TaskStartBlockingEvaluator();
+        });
+
+        $this->app->singleton(ExecutionBlockingGuard::class, function ($app): ExecutionBlockingGuard {
+            return new ExecutionBlockingGuard(
+                $app->make(TaskStartBlockingEvaluator::class)
             );
         });
 
@@ -173,7 +186,7 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
 
                     $registrar->register($schedule, $tasks);
 
-                    $schedule->command('task-orchestrator:recover-stale-runs --minutes=10')
+                    $schedule->command('task-orchestrator:recover-stale-runs')
                         ->everyTenMinutes()
                         ->withoutOverlapping();
                 }

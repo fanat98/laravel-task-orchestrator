@@ -9,6 +9,7 @@ use Malsa\TaskOrchestrator\Domain\Enums\TaskRunStatus;
 use Malsa\TaskOrchestrator\Domain\TaskRun;
 use Malsa\TaskOrchestrator\Jobs\ExecuteTaskRunJob;
 use Malsa\TaskOrchestrator\Models\TaskRunRecord;
+use Malsa\TaskOrchestrator\Support\ExecutionBlockingGuard;
 use Malsa\TaskOrchestrator\Support\TaskContext;
 use Malsa\TaskOrchestrator\Support\TaskOrchestratorManager;
 
@@ -16,6 +17,7 @@ final readonly class StartTaskAction
 {
     public function __construct(
         private TaskOrchestratorManager $tasks,
+        private ExecutionBlockingGuard $executionBlockingGuard,
     ) {
     }
 
@@ -39,24 +41,10 @@ final readonly class StartTaskAction
 
         $definition->ensureValid();
 
+        $this->executionBlockingGuard->ensureCanStart($definition);
+
         $taskRunId = (string) Str::uuid();
 
-        if (! $definition->allowConcurrentRuns) {
-            $existingQueuedOrRunning = TaskRunRecord::query()
-                ->where('task_name', $definition->name)
-                ->whereIn('status', [
-                    TaskRunStatus::Queued->value,
-                    TaskRunStatus::Running->value,
-                ])
-                ->exists();
-
-            if ($existingQueuedOrRunning) {
-                throw new \RuntimeException(sprintf(
-                    'Task "%s" is already queued or running.',
-                    $definition->name
-                ));
-            }
-        }
 
         $record = TaskRunRecord::query()->create([
             'id' => $taskRunId,
