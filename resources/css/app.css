@@ -288,6 +288,88 @@ th {
     white-space: nowrap;
 }
 
+.pagination-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.pagination-meta {
+    color: var(--text-muted);
+    font-size: 0.83rem;
+    font-weight: 600;
+}
+
+.pagination-links {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.pagination-link,
+.pagination-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.1rem;
+    height: 2.1rem;
+    padding: 0 0.6rem;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--surface-muted);
+    color: var(--text);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.pagination-link:hover {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.35);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.pagination-link.is-nav {
+    min-width: 5.4rem;
+    padding: 0 0.8rem;
+}
+
+.pagination-link.is-active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.28);
+}
+
+.pagination-link.is-disabled {
+    color: var(--text-muted);
+    background: var(--surface);
+    border-style: dashed;
+    pointer-events: none;
+    opacity: 0.65;
+}
+
+[data-theme="dark"] .pagination-link,
+[data-theme="dark"] .pagination-ellipsis {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: #334155;
+}
+
+[data-theme="dark"] .pagination-link:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(96, 165, 250, 0.45);
+}
+
 .table-actions form {
     margin: 0;
 }
@@ -976,6 +1058,20 @@ table tbody tr:hover {
     .logs-toolbar {
         flex-direction: column;
         align-items: start;
+    }
+
+    .pagination-wrap {
+        justify-content: center;
+        padding: 0.75rem;
+    }
+
+    .pagination-meta {
+        width: 100%;
+        text-align: center;
+    }
+
+    .pagination-links {
+        justify-content: center;
     }
 }
 

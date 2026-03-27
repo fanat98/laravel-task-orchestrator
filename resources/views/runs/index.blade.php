@@ -94,7 +94,7 @@
         </div>
 
         <div style="margin-top: 1rem;">
-            {{ $runs->links() }}
+            {{ $runs->links('task-orchestrator::partials.pagination') }}
         </div>
     @endif
 @endsection
