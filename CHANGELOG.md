@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 ---
+## [1.2.0] - 2026-03-27
+
+### Added
+- Per-task queue routing via discovery metadata:
+    - `queue`
+    - `connection`
+
+### Fixed
+- `TaskDefinition` immutable builders now preserve `queue` and `connection` across chained calls.
+- Retry no longer fails with runtime error when the same task is already queued/running; existing active run is returned instead.
+
+### Docs
+- Updated `README.md` and `docs/discovery.md` with queue/connection discovery examples.
 
 ## [1.1.0] - 2026-03-26
 

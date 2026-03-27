@@ -12,10 +12,10 @@ use Malsa\TaskOrchestrator\Models\TaskRunRecord;
 use Malsa\TaskOrchestrator\Support\TaskContext;
 use Malsa\TaskOrchestrator\Support\TaskOrchestratorManager;
 
-final class StartTaskAction
+final readonly class StartTaskAction
 {
     public function __construct(
-        private readonly TaskOrchestratorManager $tasks,
+        private TaskOrchestratorManager $tasks,
     ) {
     }
 
@@ -76,7 +76,16 @@ final class StartTaskAction
             60
         );
 
-        ExecuteTaskRunJob::dispatch($taskRunId, $timeoutSeconds);
+
+        $dispatch = ExecuteTaskRunJob::dispatch($taskRunId, $timeoutSeconds);
+
+        if ($definition->connection) {
+            $dispatch->onConnection($definition->connection);
+        }
+
+        if ($definition->queue) {
+            $dispatch->onQueue($definition->queue);
+        }
 
         return [
             'run' => new TaskRun(

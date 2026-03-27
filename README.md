@@ -101,6 +101,8 @@ return [
             'group' => 'ETL Imports',
             'group_order' => 10,
             'order' => 10,
+            'connection' => 'database',
+            'queue' => 'imports',
             'schedule' => [
                 'expression' => '* * * * *',
                 'human' => 'Every minute',

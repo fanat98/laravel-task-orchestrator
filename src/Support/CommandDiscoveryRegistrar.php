@@ -22,6 +22,8 @@ final readonly class CommandDiscoveryRegistrar
      *     order?: int,
      *     depends_on?: array<int, string>,
      *     timeout_minutes?: int,
+     *     queue?: string,
+     *     connection?: string,
      *     schedule?: array{expression?: string, human?: string}
      * }> $commands
      */
@@ -46,7 +48,9 @@ final readonly class CommandDiscoveryRegistrar
      *     group_order?: int,
      *     order?: int,
      *     depends_on?: array<int, string>,
-      *    timeout_minutes?: int,
+     *      timeout_minutes?: int,
+     *     queue?: string,
+     *     connection?: string,
      *     schedule?: array{expression?: string, human?: string}
      * } $value
      * @return array{0: string, 1: array{
@@ -57,7 +61,9 @@ final readonly class CommandDiscoveryRegistrar
      *     group_order?: int,
      *     order?: int,
      *     depends_on?: array<int, string>,
-      *    timeout_minutes?: int,
+     *     timeout_minutes?: int,
+     *      queue?: string,
+     *     connection?: string,
      *     schedule?: array{expression?: string, human?: string}
      * }}
      */

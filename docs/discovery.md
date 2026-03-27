@@ -42,6 +42,8 @@ return [
             'group' => 'ETL Imports',
             'group_order' => 10,
             'order' => 10,
+            'connection' => 'database',
+            'queue' => 'imports',
             'schedule' => [
                 'expression' => '* * * * *',
                 'human' => 'Every minute',
@@ -187,6 +189,26 @@ Optional per-task timeout:
 ```
 
 Used for stale run detection.
+
+---
+
+### queue
+
+Optional target queue for this task run:
+
+```php id="q7u2m9"
+'queue' => 'imports'
+```
+
+---
+
+### connection
+
+Optional queue connection for this task run:
+
+```php id="c3k9b1"
+'connection' => 'database'
+```
 
 ---
 

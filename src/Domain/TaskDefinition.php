@@ -28,6 +28,8 @@ final class TaskDefinition
         public readonly ?int $timeoutMinutes,
         public readonly bool $allowManualRun,
         public readonly bool $allowConcurrentRuns,
+        public readonly ?string $queue,
+        public readonly ?string $connection,
     ) {
         if ($this->name === '') {
             throw new \InvalidArgumentException('Task name cannot be empty.');
@@ -54,6 +56,8 @@ final class TaskDefinition
             timeoutMinutes: null,
             allowManualRun: true,
             allowConcurrentRuns: false,
+            queue: null,
+            connection: null,
         );
     }
 
@@ -73,6 +77,8 @@ final class TaskDefinition
             timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
         );
     }
 
@@ -92,6 +98,8 @@ final class TaskDefinition
             timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
         );
     }
 
@@ -111,6 +119,8 @@ final class TaskDefinition
             timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
         );
     }
 
@@ -133,6 +143,8 @@ final class TaskDefinition
             timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
         );
     }
 
@@ -152,6 +164,8 @@ final class TaskDefinition
             timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
         );
     }
 
@@ -171,6 +185,8 @@ final class TaskDefinition
             timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
         );
     }
 
@@ -190,6 +206,8 @@ final class TaskDefinition
             timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
         );
     }
 
@@ -215,6 +233,8 @@ final class TaskDefinition
             timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
         );
     }
 
@@ -237,6 +257,8 @@ final class TaskDefinition
             timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
         );
     }
 
@@ -256,6 +278,8 @@ final class TaskDefinition
             timeoutMinutes: $timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
         );
     }
 
@@ -275,6 +299,8 @@ final class TaskDefinition
             timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $allowManualRun,
             allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
         );
     }
 
@@ -294,6 +320,50 @@ final class TaskDefinition
             timeoutMinutes: $this->timeoutMinutes,
             allowManualRun: $this->allowManualRun,
             allowConcurrentRuns: $allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
+        );
+    }
+
+    public function queue(?string $queue): self
+    {
+        return new self(
+            name: $this->name,
+            label: $this->label,
+            description: $this->description,
+            command: $this->command,
+            arguments: $this->arguments,
+            group: $this->group,
+            groupOrder: $this->groupOrder,
+            order: $this->order,
+            schedule: $this->schedule,
+            dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
+            allowManualRun: $this->allowManualRun,
+            allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $queue,
+            connection: $this->connection,
+        );
+    }
+
+    public function connection(?string $connection): self
+    {
+        return new self(
+            name: $this->name,
+            label: $this->label,
+            description: $this->description,
+            command: $this->command,
+            arguments: $this->arguments,
+            group: $this->group,
+            groupOrder: $this->groupOrder,
+            order: $this->order,
+            schedule: $this->schedule,
+            dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
+            allowManualRun: $this->allowManualRun,
+            allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $connection,
         );
     }
 
@@ -307,6 +377,20 @@ final class TaskDefinition
         if (! filled($this->command)) {
             throw new \InvalidArgumentException(sprintf(
                 'Task "%s" must define a command before registration.',
+                $this->name
+            ));
+        }
+
+        if ($this->queue !== null && trim($this->queue) === '') {
+            throw new \InvalidArgumentException(sprintf(
+                'Task "%s" defines an invalid queue.',
+                $this->name
+            ));
+        }
+
+        if ($this->connection !== null && trim($this->connection) === '') {
+            throw new \InvalidArgumentException(sprintf(
+                'Task "%s" defines an invalid queue connection.',
                 $this->name
             ));
         }

@@ -9,7 +9,6 @@ use Malsa\TaskOrchestrator\Domain\TaskDefinition;
 
 final class DiscoveredTaskDefinitionFactory
 {
-
     /**
      * @param array{
      *     name?: string,
@@ -20,6 +19,8 @@ final class DiscoveredTaskDefinitionFactory
      *     order?: int,
      *     depends_on?: array<int, string>,
      *     timeout_minutes?: int,
+     *     queue?: string,
+     *     connection?: string,
      *     schedule?: array{expression?: string, human?: string}
      * } $metadata
      */
@@ -33,7 +34,23 @@ final class DiscoveredTaskDefinitionFactory
         $order = $metadata['order'] ?? null;
         $dependsOn = $metadata['depends_on'] ?? [];
         $timeoutMinutes = $metadata['timeout_minutes'] ?? null;
+        $queue = $metadata['queue'] ?? null;
+        $connection = $metadata['connection'] ?? null;
         $schedule = $metadata['schedule'] ?? null;
+
+        if ($queue !== null && ! is_string($queue)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Task "%s" has invalid queue metadata. Expected string.',
+                $name
+            ));
+        }
+
+        if ($connection !== null && ! is_string($connection)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Task "%s" has invalid connection metadata. Expected string.',
+                $name
+            ));
+        }
 
         return TaskDefinition::make($name)
             ->label($label)
@@ -44,6 +61,8 @@ final class DiscoveredTaskDefinitionFactory
             ->order($order)
             ->dependsOn($dependsOn)
             ->timeoutMinutes($timeoutMinutes)
+            ->queue($queue)
+            ->connection($connection)
             ->schedule($schedule);
     }
 
