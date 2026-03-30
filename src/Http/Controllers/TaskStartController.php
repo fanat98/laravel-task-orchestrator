@@ -5,16 +5,14 @@ declare(strict_types=1);
 namespace Malsa\TaskOrchestrator\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
-use Malsa\TaskOrchestrator\Actions\StartTaskChainAction;
+use Malsa\TaskOrchestrator\Actions\StartTaskAction;
 
 final class TaskStartController
 {
-    public function __invoke(string $task, StartTaskChainAction $startTaskChain): RedirectResponse
+    public function __invoke(string $task, StartTaskAction $startTask): RedirectResponse
     {
-        $results = $startTaskChain->execute($task, 'manual');
+        $result = $startTask->execute($task, 'manual');
 
-        $last = end($results);
-
-        return redirect()->route('task-orchestrator.runs.show', $last['record']->id);
+        return redirect()->route('task-orchestrator.runs.show', $result['record']->id);
     }
 }

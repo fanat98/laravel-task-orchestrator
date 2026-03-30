@@ -16,6 +16,7 @@ A lightweight task orchestration layer for Laravel that adds visibility, depende
 * 🧩 Pipeline view (visual flow of tasks)
 * 🎯 Manual & scheduled triggers
 * 🟢 Status tracking (queued, running, succeeded, failed)
+* 🩺 Queue + scheduler health monitoring in dashboard
 * 🧯 Stale run recovery (auto-fail hanging tasks)
 * ⏱ Per-task timeout configuration
 * 🌙 Dark / Light mode
@@ -75,6 +76,13 @@ return [
     'fail_on_invalid_dependencies' => false,
 
     'stale_run_default_minutes' => 10,
+
+    'health' => [
+        'queue_stuck_threshold_seconds' => 300,
+        'scheduler_heartbeat_cache_key' => 'task-orchestrator:scheduler-heartbeat',
+        'scheduler_heartbeat_max_age_seconds' => 180,
+        'scheduler_heartbeat_ttl_seconds' => 86400,
+    ],
 ];
 ```
 
@@ -158,6 +166,8 @@ When a task succeeds:
 * downstream tasks are triggered automatically
 * all runs are grouped into a pipeline
 
+Manual starts trigger only the selected task.
+
 ---
 
 ## 🧯 Stale Run Recovery
@@ -172,6 +182,18 @@ Behavior:
 
 * uses per-task `timeout_minutes` if defined
 * otherwise uses global config default
+
+---
+
+## 🩺 Dashboard Health Monitoring
+
+The dashboard reports queue and scheduler health:
+
+* queue `healthy`: no pending jobs
+* queue `busy`: pending jobs exist but oldest pending age is below threshold
+* queue `stuck`: oldest pending age exceeds threshold
+* scheduler `running`: heartbeat is recent
+* scheduler `down`: heartbeat is stale or missing
 
 ---
 

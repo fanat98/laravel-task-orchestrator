@@ -18,6 +18,7 @@ use Malsa\TaskOrchestrator\Support\CurrentTaskRunStore;
 use Malsa\TaskOrchestrator\Support\DiscoveredScheduleRegistrar;
 use Malsa\TaskOrchestrator\Support\DiscoveredTaskDefinitionFactory;
 use Malsa\TaskOrchestrator\Support\ExecutionBlockingGuard;
+use Malsa\TaskOrchestrator\Support\HealthStateCalculator;
 use Malsa\TaskOrchestrator\Support\SystemHealthInspector;
 use Malsa\TaskOrchestrator\Support\TaskStartBlockingEvaluator;
 use Malsa\TaskOrchestrator\Support\TaskDependencyCompletionGuard;
@@ -102,7 +103,13 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(SystemHealthInspector::class, function (): SystemHealthInspector {
-            return new SystemHealthInspector();
+            return new SystemHealthInspector(
+                $this->app->make(HealthStateCalculator::class)
+            );
+        });
+
+        $this->app->singleton(HealthStateCalculator::class, function (): HealthStateCalculator {
+            return new HealthStateCalculator();
         });
 
         $this->app->singleton(TaskScheduleCalculator::class, function (): TaskScheduleCalculator {
@@ -170,6 +177,7 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
             $this->commands([
                 \Malsa\TaskOrchestrator\Console\Commands\RunScheduledTaskCommand::class,
                 \Malsa\TaskOrchestrator\Console\Commands\RecoverStaleTaskRunsCommand::class,
+                \Malsa\TaskOrchestrator\Console\Commands\RecordSchedulerHeartbeatCommand::class,
             ]);
         }
 
@@ -188,6 +196,10 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
 
                     $schedule->command('task-orchestrator:recover-stale-runs')
                         ->everyTenMinutes()
+                        ->withoutOverlapping();
+
+                    $schedule->command('task-orchestrator:record-scheduler-heartbeat')
+                        ->everyMinute()
                         ->withoutOverlapping();
                 }
             );

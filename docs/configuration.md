@@ -111,6 +111,46 @@ Used when a task does not define its own timeout.
 
 ---
 
+### health.queue_stuck_threshold_seconds
+
+Threshold (in seconds) used to classify queue state as `stuck`.
+
+```php
+300
+```
+
+---
+
+### health.scheduler_heartbeat_cache_key
+
+Cache key used for scheduler heartbeat timestamp.
+
+```php
+'task-orchestrator:scheduler-heartbeat'
+```
+
+---
+
+### health.scheduler_heartbeat_max_age_seconds
+
+Maximum heartbeat age before scheduler is considered `down`.
+
+```php
+180
+```
+
+---
+
+### health.scheduler_heartbeat_ttl_seconds
+
+Cache TTL for heartbeat entries.
+
+```php
+86400
+```
+
+---
+
 ## Best Practices
 
 * Use `user_field` for simple setups

@@ -63,7 +63,7 @@ Each run has a trigger:
 
 * downstream tasks only run if parent **succeeded**
 * failed task stops the pipeline
-* manual run starts a new pipeline
+* manual run starts only the selected task
 * scheduled run starts a new pipeline
 
 ---

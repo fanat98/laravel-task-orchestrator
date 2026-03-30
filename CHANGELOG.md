@@ -12,16 +12,30 @@ All notable changes to this project will be documented in this file.
     - `blocked_by_task_names`
     - `start_block_reason`
     - `can_start`
+- Dashboard health monitoring for queue and scheduler:
+    - queue status (`healthy`, `busy`, `stuck`) based on pending job count and oldest pending job age
+    - scheduler status (`running`, `down`) based on scheduler heartbeat timestamp
+    - configurable health thresholds and heartbeat settings in `task-orchestrator.health`
+- Scheduler heartbeat command and schedule registration:
+    - `task-orchestrator:record-scheduler-heartbeat`
+    - heartbeat recorded every minute via scheduler registration
 
 ### Changed
 - `StartTaskAction` now enforces dependency-based blocking through the centralized backend guard path.
 - Stale-run recovery scheduler registration now runs without hardcoded `--minutes` override to respect task-specific timeouts.
+- Manual task start now starts only the selected task (no upstream chain resolution).
+- Dashboard health payload now includes structured `queue` and `scheduler` sections while keeping compatibility top-level metrics.
 
 ### Fixed
 - Prevented duplicate task starts across trigger paths when dependencies are active or not in a succeeded state.
 - Disabled run buttons consistently when backend startability state is false in task list and dashboard views.
 - Removed duplicate or unclear run-state helper actions in the UI and simplified button states.
 - Replaced mixed pagination rendering with a single package-styled pagination component.
+- Prevented manual starts of dependent tasks from automatically dispatching prerequisite tasks.
+
+### Docs
+- Updated health monitoring docs to describe queue/scheduler status semantics and configuration.
+- Updated pipeline behavior docs to reflect manual start behavior.
 
 ## [1.2.0] - 2026-03-27
 

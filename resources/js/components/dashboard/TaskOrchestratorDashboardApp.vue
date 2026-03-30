@@ -34,13 +34,23 @@
 
                 <div class="health-meta">
                     <div class="health-meta-item">
-                        <div class="health-meta-label">Pending Queue Jobs</div>
-                        <div class="health-meta-value">{{ health.pending_jobs ?? 'n/a' }}</div>
+                        <div class="health-meta-label">Queue Status</div>
+                        <div class="health-meta-value">{{ capitalize(health.queue?.status) || '—' }}</div>
                     </div>
 
                     <div class="health-meta-item">
-                        <div class="health-meta-label">Stale Queued Runs</div>
-                        <div class="health-meta-value">{{ health.stale_queued_runs }}</div>
+                        <div class="health-meta-label">Scheduler Status</div>
+                        <div class="health-meta-value">{{ capitalize(health.scheduler?.status) || '—' }}</div>
+                    </div>
+
+                    <div class="health-meta-item">
+                        <div class="health-meta-label">Pending Queue Jobs</div>
+                        <div class="health-meta-value">{{ health.queue?.pending_jobs ?? health.pending_jobs ?? 'n/a' }}</div>
+                    </div>
+
+                    <div class="health-meta-item">
+                        <div class="health-meta-label">Oldest Pending Job Age</div>
+                        <div class="health-meta-value">{{ formatAge(health.queue?.oldest_pending_job_age_seconds ?? health.oldest_pending_job_age_seconds) }}</div>
                     </div>
                 </div>
             </div>
@@ -266,6 +276,14 @@ function buildRunHistoryTitle(run) {
 function capitalize(value) {
     if (!value) return ''
     return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+function formatAge(seconds) {
+    if (seconds === null || seconds === undefined) {
+        return '—'
+    }
+
+    return `${seconds}s`
 }
 
 function triggerLabel(value) {

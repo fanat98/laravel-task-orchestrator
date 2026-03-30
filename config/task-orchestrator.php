@@ -39,4 +39,11 @@ return [
     'discovery_path' => app_path('TaskOrchestrator/discovery.php'),
     'fail_on_invalid_dependencies' => false,
     'stale_run_default_minutes' => 10,
+
+    'health' => [
+        'queue_stuck_threshold_seconds' => 300,
+        'scheduler_heartbeat_cache_key' => 'task-orchestrator:scheduler-heartbeat',
+        'scheduler_heartbeat_max_age_seconds' => 180,
+        'scheduler_heartbeat_ttl_seconds' => 86400,
+    ],
 ];

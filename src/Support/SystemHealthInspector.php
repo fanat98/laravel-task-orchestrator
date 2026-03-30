@@ -4,64 +4,122 @@ declare(strict_types=1);
 
 namespace Malsa\TaskOrchestrator\Support;
 
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Malsa\TaskOrchestrator\Domain\Enums\TaskRunStatus;
-use Malsa\TaskOrchestrator\Models\TaskRunRecord;
 use Throwable;
 
 final class SystemHealthInspector
 {
+    public function __construct(
+        private readonly HealthStateCalculator $stateCalculator,
+    ) {
+    }
+
     /**
      * @return array{
      *     status: string,
+     *     queue: array{status: string, pending_jobs: int|null, oldest_pending_job_age_seconds: int|null},
+     *     scheduler: array{status: string, last_heartbeat_at: string|null},
      *     pending_jobs: int|null,
-     *     stale_queued_runs: int,
+     *     oldest_pending_job_age_seconds: int|null,
      *     message: string
      * }
      */
     public function inspect(): array
     {
-        $pendingJobs = $this->getPendingJobsCount();
-        $staleQueuedRuns = $this->getStaleQueuedRunsCount();
+        $queueMetrics = $this->getQueueMetrics();
+        $pendingJobs = $queueMetrics['pending_jobs'];
+        $oldestPendingJobAgeSeconds = $queueMetrics['oldest_pending_job_age_seconds'];
 
-        if ($staleQueuedRuns > 0) {
-            return [
-                'status' => 'critical',
-                'pending_jobs' => $pendingJobs,
-                'stale_queued_runs' => $staleQueuedRuns,
-                'message' => 'Queued task runs are waiting too long. The queue worker may be stopped or blocked.',
-            ];
-        }
+        $stuckThresholdSeconds = (int) config('task-orchestrator.health.queue_stuck_threshold_seconds', 300);
+        $lastHeartbeatAt = $this->getSchedulerHeartbeat();
+        $heartbeatMaxAgeSeconds = (int) config('task-orchestrator.health.scheduler_heartbeat_max_age_seconds', 180);
+        $now = CarbonImmutable::now();
 
-        if (($pendingJobs ?? 0) > 0) {
-            return [
-                'status' => 'warning',
-                'pending_jobs' => $pendingJobs,
-                'stale_queued_runs' => $staleQueuedRuns,
-                'message' => 'There are pending queue jobs. The system may be processing normally or building backlog.',
-            ];
-        }
+        $queueStatus = $this->stateCalculator->queueStatus(
+            $pendingJobs ?? 0,
+            $oldestPendingJobAgeSeconds,
+            $stuckThresholdSeconds
+        );
+
+        $schedulerStatus = $this->stateCalculator->schedulerStatus(
+            $lastHeartbeatAt,
+            $now,
+            $heartbeatMaxAgeSeconds
+        );
 
         return [
-            'status' => 'healthy',
+            'status' => $this->stateCalculator->overallStatus($queueStatus, $schedulerStatus),
+            'queue' => [
+                'status' => $queueStatus,
+                'pending_jobs' => $pendingJobs,
+                'oldest_pending_job_age_seconds' => $oldestPendingJobAgeSeconds,
+            ],
+            'scheduler' => [
+                'status' => $schedulerStatus,
+                'last_heartbeat_at' => $lastHeartbeatAt?->toIso8601String(),
+            ],
+            // Keep top-level metrics for backward compatibility in the dashboard payload.
             'pending_jobs' => $pendingJobs,
-            'stale_queued_runs' => $staleQueuedRuns,
-            'message' => 'Queue and task execution look healthy.',
+            'oldest_pending_job_age_seconds' => $oldestPendingJobAgeSeconds,
+            'message' => $this->stateCalculator->message($queueStatus, $schedulerStatus),
         ];
     }
 
-    private function getStaleQueuedRunsCount(): int
-    {
-        return TaskRunRecord::query()
-            ->where('status', TaskRunStatus::Queued->value)
-            ->where('created_at', '<=', now()->subMinute())
-            ->count();
-    }
-
-    private function getPendingJobsCount(): ?int
+    /**
+     * @return array{pending_jobs: int|null, oldest_pending_job_age_seconds: int|null}
+     */
+    private function getQueueMetrics(): array
     {
         try {
-            return DB::table('jobs')->count();
+            $pendingJobs = (int) DB::table('jobs')
+                ->whereNull('reserved_at')
+                ->count();
+
+            if ($pendingJobs === 0) {
+                return [
+                    'pending_jobs' => 0,
+                    'oldest_pending_job_age_seconds' => null,
+                ];
+            }
+
+            $oldestPendingTimestamp = DB::table('jobs')
+                ->whereNull('reserved_at')
+                ->min('available_at');
+
+            if (! is_numeric($oldestPendingTimestamp)) {
+                return [
+                    'pending_jobs' => $pendingJobs,
+                    'oldest_pending_job_age_seconds' => null,
+                ];
+            }
+
+            return [
+                'pending_jobs' => $pendingJobs,
+                'oldest_pending_job_age_seconds' => max(0, now()->timestamp - (int) $oldestPendingTimestamp),
+            ];
+        } catch (Throwable) {
+            return [
+                'pending_jobs' => null,
+                'oldest_pending_job_age_seconds' => null,
+            ];
+        }
+    }
+
+    private function getSchedulerHeartbeat(): ?CarbonImmutable
+    {
+        $heartbeatValue = Cache::get((string) config(
+            'task-orchestrator.health.scheduler_heartbeat_cache_key',
+            'task-orchestrator:scheduler-heartbeat'
+        ));
+
+        if (! is_string($heartbeatValue) || trim($heartbeatValue) === '') {
+            return null;
+        }
+
+        try {
+            return CarbonImmutable::parse($heartbeatValue);
         } catch (Throwable) {
             return null;
         }
