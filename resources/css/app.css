@@ -1320,6 +1320,15 @@ table tbody tr:hover {
     line-height: 1.25;
 }
 
+.group-task-label a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.group-task-label a:hover {
+    text-decoration: underline;
+}
+
 .group-task-item {
     position: relative;
 }
@@ -1338,3 +1347,164 @@ th {
 td {
     line-height: 1.3;
 }
+
+.task-detail-page {
+    gap: 1.25rem;
+}
+
+.task-detail-header {
+    margin-bottom: 0.05rem;
+}
+
+.task-overview-panel {
+    padding-bottom: 1rem;
+}
+
+.task-overview-content {
+    padding-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.task-overview-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.85rem;
+}
+
+.task-overview-item {
+    border: 1px solid var(--border);
+    background: var(--surface-muted);
+    border-radius: 12px;
+    padding: 0.9rem 0.95rem;
+}
+
+.task-overview-label {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+}
+
+.task-overview-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.task-overview-subsections {
+    margin-top: 0.15rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.task-overview-section {
+    border: 1px solid var(--border);
+    background: var(--surface-muted);
+    border-radius: 12px;
+    padding: 0.95rem 1rem;
+}
+
+.task-overview-section .task-overview-label {
+    margin-bottom: 0.55rem;
+}
+
+.task-recent-runs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.35rem;
+    min-height: 22px;
+}
+
+.task-tabs-shell {
+    padding: 0.8rem 0.8rem 0;
+    margin: -0.25rem -0.25rem 0;
+    border-radius: 12px 12px 0 0;
+    background: linear-gradient(180deg, var(--surface-muted), transparent);
+}
+
+.task-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.75rem;
+    margin-bottom: 0;
+}
+
+.task-tab-button {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.task-tab-button:hover {
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+.task-tab-button.is-active {
+    background: var(--primary-dark);
+    color: #fff;
+    border-color: var(--primary-dark);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+.task-tab-content {
+    min-height: 220px;
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.15rem;
+    margin-top: 0.85rem;
+}
+
+.task-tab-pane {
+    padding: 0.25rem;
+}
+
+.task-tab-pane .table-wrap {
+    margin-top: 0.25rem;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.task-tab-pane .empty,
+.task-tab-pane .muted {
+    margin-top: 0.35rem;
+}
+
+.task-tab-pane .table-compact {
+    background: var(--surface);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.task-overview-summary {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+}
+
+.task-tab-pagination {
+    margin-top: 0.95rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.task-doc-block + .task-doc-block {
+    margin-top: 1rem;
+}
+

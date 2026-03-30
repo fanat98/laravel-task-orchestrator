@@ -12,12 +12,32 @@ use Malsa\TaskOrchestrator\Http\Controllers\TaskRunShowController;
 use Malsa\TaskOrchestrator\Http\Controllers\TaskStartController;
 use Malsa\TaskOrchestrator\Http\Controllers\TaskRunStatusController;
 use Malsa\TaskOrchestrator\Http\Controllers\TaskRunLogsController;
+use Malsa\TaskOrchestrator\Http\Controllers\TaskShowController;
+use Malsa\TaskOrchestrator\Http\Controllers\TaskRunsController;
+use Malsa\TaskOrchestrator\Http\Controllers\TaskFailuresController;
+use Malsa\TaskOrchestrator\Http\Controllers\TaskLogsController;
+use Malsa\TaskOrchestrator\Http\Controllers\TaskDocumentationController;
 
 Route::get('/', DashboardController::class)
     ->name('dashboard');
 
 Route::get('/tasks', TaskIndexController::class)
     ->name('tasks.index');
+
+Route::get('/tasks/{task}', TaskShowController::class)
+    ->name('tasks.show');
+
+Route::get('/tasks/{task}/runs', TaskRunsController::class)
+    ->name('tasks.runs');
+
+Route::get('/tasks/{task}/failures', TaskFailuresController::class)
+    ->name('tasks.failures');
+
+Route::get('/tasks/{task}/logs', TaskLogsController::class)
+    ->name('tasks.logs');
+
+Route::get('/tasks/{task}/documentation', TaskDocumentationController::class)
+    ->name('tasks.documentation');
 
 Route::post('/tasks/{task}/run', TaskStartController::class)
     ->name('tasks.run');

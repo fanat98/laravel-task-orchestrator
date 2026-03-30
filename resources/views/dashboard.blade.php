@@ -34,12 +34,6 @@
             <h1 class="page-title">Operations Dashboard</h1>
             <p class="page-subtitle">Overview of registered tasks, recent executions, and current failures.</p>
         </div>
-
-        <div class="nav-actions">
-            <a class="button" href="{{ route('task-orchestrator.tasks.index') }}">View tasks</a>
-            <a class="button button-secondary" href="{{ route('task-orchestrator.runs.index') }}">View runs</a>
-            <a class="button button-secondary" href="{{ route('task-orchestrator.pipelines.index') }}">View pipelines</a>
-        </div>
     </div>
 
     <div

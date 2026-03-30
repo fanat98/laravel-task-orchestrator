@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import '../css/app.css'
 import TaskOrchestratorDashboardApp from './components/dashboard/TaskOrchestratorDashboardApp.vue'
 import TaskOrchestratorRunDetailApp from './components/runs/TaskOrchestratorRunDetailApp.vue'
+import TaskDetailPage from './components/tasks/TaskDetailPage.vue'
 
 const dashboardElement = document.getElementById('task-orchestrator-dashboard-app')
 
@@ -33,6 +34,23 @@ if (runDetailElement) {
         initialLogs: JSON.parse(runDetailElement.dataset.initialLogs || '[]'),
         pollInterval: Number(runDetailElement.dataset.pollInterval || 3000),
     }).mount(runDetailElement)
+}
+
+const taskDetailElement = document.getElementById('task-orchestrator-task-detail-app')
+
+if (taskDetailElement) {
+    createApp(TaskDetailPage, {
+        runBaseUrl: taskDetailElement.dataset.runBaseUrl,
+        taskIndexUrl: taskDetailElement.dataset.taskIndexUrl,
+        taskRunUrl: taskDetailElement.dataset.taskRunUrl,
+        csrfToken: taskDetailElement.dataset.csrfToken,
+        taskRunsUrl: taskDetailElement.dataset.taskRunsUrl,
+        taskFailuresUrl: taskDetailElement.dataset.taskFailuresUrl,
+        taskLogsUrl: taskDetailElement.dataset.taskLogsUrl,
+        taskDocumentationUrl: taskDetailElement.dataset.taskDocumentationUrl,
+        initialTask: JSON.parse(taskDetailElement.dataset.initialTask || '{}'),
+        initialRecentRuns: JSON.parse(taskDetailElement.dataset.initialRecentRuns || '[]'),
+    }).mount(taskDetailElement)
 }
 
 

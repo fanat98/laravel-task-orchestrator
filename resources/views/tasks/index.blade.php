@@ -41,7 +41,11 @@
                 <tbody>
                 @foreach ($tasks as $task)
                     <tr>
-                        <td>{{ $task['label'] }}</td>
+                        <td>
+                            <a href="{{ route('task-orchestrator.tasks.show', $task['name']) }}">
+                                {{ $task['label'] }}
+                            </a>
+                        </td>
                         <td class="hide-sm">{{ $task['group'] ?: '—' }}</td>
                         <td class="hide-sm table-cell-muted truncate" title="{{ $task['command'] }}">
                             {{ Str::limit($task['command'], 25) }}

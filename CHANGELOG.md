@@ -12,11 +12,30 @@ All notable changes to this project will be documented in this file.
 - Queue worker heartbeat mechanisms:
     - scheduled heartbeat via `QueueHeartbeatJob`
     - execution heartbeat updates in `ExecuteTaskRunJob`
+- Task detail page with lazy-loaded tabs and dedicated endpoints:
+    - `GET /tasks/{task}`
+    - `GET /tasks/{task}/runs`
+    - `GET /tasks/{task}/failures`
+    - `GET /tasks/{task}/logs`
+    - `GET /tasks/{task}/documentation`
+- `TaskDetailDataProvider` for task meta, recent runs, startability state, logs, and documentation extraction.
+- Task documentation extraction support from command description, `documentation()` method, and `$documentation` property.
+- Dashboard task labels now link directly to task detail pages.
+
 ### Changed
 - Queue worker heartbeat is now hybrid (scheduled + task execution) so liveness detection also works when scheduler is unavailable but workers process tasks.
+- Manual task start now starts only the selected task (no upstream chain resolution).
+- Task detail page UX polish:
+    - structured overview cards/subsections
+    - stronger tab styling and spacing
+    - default tab is now `Runs` (redundant `Overview` tab removed)
+    - logs tab simplified to latest-run logs only
+    - task start action integrated into detail header using existing backend startability rules
+- Removed redundant dashboard header action buttons (`View tasks`, `View runs`, `View pipelines`) because top navigation already covers these links.
 
 ### Docs
 - Updated docs with queue worker liveness behavior and `health.queue_worker.heartbeat_max_age_seconds` configuration.
+- Updated documentation for task detail page behavior and manual start semantics.
 
 ## [1.3.0] - 2026-03-30
 

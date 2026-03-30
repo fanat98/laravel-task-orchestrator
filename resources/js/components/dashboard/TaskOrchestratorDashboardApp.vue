@@ -82,7 +82,9 @@
                                     <!-- Top Row -->
                                     <div class="group-task-top">
                                         <div class="group-task-label">
-                                            {{ task.label }}
+                                            <a :href="buildTaskUrl(task.name)">
+                                                {{ task.label }}
+                                            </a>
                                         </div>
 
                                         <span
@@ -341,6 +343,10 @@ function buildRunUrl(runId) {
 
 function buildTaskRunUrl(taskName) {
     return `${props.taskRunBaseUrl}/${taskName}/run`
+}
+
+function buildTaskUrl(taskName) {
+    return `${props.taskRunBaseUrl}/${taskName}`
 }
 
 async function refreshDashboard() {
