@@ -21,6 +21,7 @@ final class SystemHealthInspector
      *     status: string,
      *     queue: array{status: string, pending_jobs: int|null, oldest_pending_job_age_seconds: int|null},
      *     scheduler: array{status: string, last_heartbeat_at: string|null},
+     *     queue_worker: array{status: string, last_heartbeat_at: string|null},
      *     pending_jobs: int|null,
      *     oldest_pending_job_age_seconds: int|null,
      *     message: string
@@ -35,6 +36,11 @@ final class SystemHealthInspector
         $stuckThresholdSeconds = (int) config('task-orchestrator.health.queue_stuck_threshold_seconds', 300);
         $lastHeartbeatAt = $this->getSchedulerHeartbeat();
         $heartbeatMaxAgeSeconds = (int) config('task-orchestrator.health.scheduler_heartbeat_max_age_seconds', 180);
+        $lastQueueWorkerHeartbeatAt = $this->getQueueWorkerHeartbeat();
+        $queueWorkerHeartbeatMaxAgeSeconds = (int) config(
+            'task-orchestrator.health.queue_worker.heartbeat_max_age_seconds',
+            60
+        );
         $now = CarbonImmutable::now();
 
         $queueStatus = $this->stateCalculator->queueStatus(
@@ -49,8 +55,21 @@ final class SystemHealthInspector
             $heartbeatMaxAgeSeconds
         );
 
+        $queueWorkerStatus = $this->stateCalculator->queueWorkerStatus(
+            $lastQueueWorkerHeartbeatAt,
+            $now,
+            $queueWorkerHeartbeatMaxAgeSeconds
+        );
+
+        $pendingJobsForAggregation = $pendingJobs ?? 0;
+
         return [
-            'status' => $this->stateCalculator->overallStatus($queueStatus, $schedulerStatus),
+            'status' => $this->stateCalculator->overallStatus(
+                $queueStatus,
+                $schedulerStatus,
+                $queueWorkerStatus,
+                $pendingJobsForAggregation,
+            ),
             'queue' => [
                 'status' => $queueStatus,
                 'pending_jobs' => $pendingJobs,
@@ -60,10 +79,19 @@ final class SystemHealthInspector
                 'status' => $schedulerStatus,
                 'last_heartbeat_at' => $lastHeartbeatAt?->toIso8601String(),
             ],
+            'queue_worker' => [
+                'status' => $queueWorkerStatus,
+                'last_heartbeat_at' => $lastQueueWorkerHeartbeatAt?->toIso8601String(),
+            ],
             // Keep top-level metrics for backward compatibility in the dashboard payload.
             'pending_jobs' => $pendingJobs,
             'oldest_pending_job_age_seconds' => $oldestPendingJobAgeSeconds,
-            'message' => $this->stateCalculator->message($queueStatus, $schedulerStatus),
+            'message' => $this->stateCalculator->message(
+                $queueStatus,
+                $schedulerStatus,
+                $queueWorkerStatus,
+                $pendingJobsForAggregation,
+            ),
         ];
     }
 
@@ -113,6 +141,21 @@ final class SystemHealthInspector
             'task-orchestrator.health.scheduler_heartbeat_cache_key',
             'task-orchestrator:scheduler-heartbeat'
         ));
+
+        if (! is_string($heartbeatValue) || trim($heartbeatValue) === '') {
+            return null;
+        }
+
+        try {
+            return CarbonImmutable::parse($heartbeatValue);
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    private function getQueueWorkerHeartbeat(): ?CarbonImmutable
+    {
+        $heartbeatValue = Cache::get('task_orchestrator.queue_worker_heartbeat');
 
         if (! is_string($heartbeatValue) || trim($heartbeatValue) === '') {
             return null;

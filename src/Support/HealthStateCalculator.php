@@ -32,23 +32,56 @@ final class HealthStateCalculator
             : 'down';
     }
 
-    public function overallStatus(string $queueStatus, string $schedulerStatus): string
+    public function queueWorkerStatus(?CarbonImmutable $lastHeartbeatAt, CarbonImmutable $now, int $maxAgeSeconds): string
+    {
+        if ($lastHeartbeatAt === null) {
+            return 'down';
+        }
+
+        return $lastHeartbeatAt->greaterThanOrEqualTo($now->subSeconds($maxAgeSeconds))
+            ? 'running'
+            : 'down';
+    }
+
+    public function overallStatus(
+        string $queueStatus,
+        string $schedulerStatus,
+        string $queueWorkerStatus,
+        int $pendingJobs,
+    ): string
     {
         if ($schedulerStatus === 'down' || $queueStatus === 'stuck') {
             return 'critical';
         }
 
-        if ($queueStatus === 'busy') {
+        if ($queueWorkerStatus === 'down' && $pendingJobs > 0) {
+            return 'critical';
+        }
+
+        if ($queueStatus === 'busy' || $queueWorkerStatus === 'down') {
             return 'warning';
         }
 
         return 'healthy';
     }
 
-    public function message(string $queueStatus, string $schedulerStatus): string
+    public function message(
+        string $queueStatus,
+        string $schedulerStatus,
+        string $queueWorkerStatus,
+        int $pendingJobs,
+    ): string
     {
         if ($schedulerStatus === 'down') {
             return 'Scheduler heartbeat is stale or missing.';
+        }
+
+        if ($queueWorkerStatus === 'down' && $pendingJobs > 0) {
+            return 'Queue worker heartbeat is stale or missing while pending jobs exist.';
+        }
+
+        if ($queueWorkerStatus === 'down') {
+            return 'Queue worker heartbeat is stale or missing.';
         }
 
         if ($queueStatus === 'stuck') {

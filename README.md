@@ -17,6 +17,7 @@ A lightweight task orchestration layer for Laravel that adds visibility, depende
 * 🎯 Manual & scheduled triggers
 * 🟢 Status tracking (queued, running, succeeded, failed)
 * 🩺 Queue + scheduler health monitoring in dashboard
+* 👷 Queue worker liveness monitoring (running/down)
 * 🧯 Stale run recovery (auto-fail hanging tasks)
 * ⏱ Per-task timeout configuration
 * 🌙 Dark / Light mode
@@ -79,6 +80,9 @@ return [
 
     'health' => [
         'queue_stuck_threshold_seconds' => 300,
+        'queue_worker' => [
+            'heartbeat_max_age_seconds' => 60,
+        ],
         'scheduler_heartbeat_cache_key' => 'task-orchestrator:scheduler-heartbeat',
         'scheduler_heartbeat_max_age_seconds' => 180,
         'scheduler_heartbeat_ttl_seconds' => 86400,
@@ -187,13 +191,20 @@ Behavior:
 
 ## 🩺 Dashboard Health Monitoring
 
-The dashboard reports queue and scheduler health:
+The dashboard reports queue, scheduler, and queue worker health:
 
 * queue `healthy`: no pending jobs
 * queue `busy`: pending jobs exist but oldest pending age is below threshold
 * queue `stuck`: oldest pending age exceeds threshold
 * scheduler `running`: heartbeat is recent
 * scheduler `down`: heartbeat is stale or missing
+* queue worker `running`: worker heartbeat is recent
+* queue worker `down`: worker heartbeat is stale or missing
+
+Queue worker heartbeat is updated by a hybrid mechanism:
+
+* scheduled `QueueHeartbeatJob` (every minute)
+* task execution heartbeat updates inside `ExecuteTaskRunJob`
 
 ---
 

@@ -44,6 +44,11 @@
                     </div>
 
                     <div class="health-meta-item">
+                        <div class="health-meta-label">Queue Worker</div>
+                        <div class="health-meta-value">{{ capitalize(health.queue_worker?.status) || '—' }}</div>
+                    </div>
+
+                    <div class="health-meta-item">
                         <div class="health-meta-label">Pending Queue Jobs</div>
                         <div class="health-meta-value">{{ health.queue?.pending_jobs ?? health.pending_jobs ?? 'n/a' }}</div>
                     </div>

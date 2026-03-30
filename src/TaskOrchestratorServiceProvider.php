@@ -28,6 +28,7 @@ use Malsa\TaskOrchestrator\Support\TaskDownstreamResolver;
 use Malsa\TaskOrchestrator\Support\TaskOrchestratorManager;
 use Malsa\TaskOrchestrator\Support\TaskProgressUpdater;
 use Malsa\TaskOrchestrator\Support\TaskScheduleCalculator;
+use Malsa\TaskOrchestrator\Jobs\QueueHeartbeatJob;
 
 final class TaskOrchestratorServiceProvider extends ServiceProvider
 {
@@ -201,6 +202,9 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
                     $schedule->command('task-orchestrator:record-scheduler-heartbeat')
                         ->everyMinute()
                         ->withoutOverlapping();
+
+                    $schedule->job((new QueueHeartbeatJob())->onQueue('default'))
+                        ->everyMinute();
                 }
             );
         });

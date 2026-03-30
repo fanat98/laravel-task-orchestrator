@@ -3,7 +3,22 @@
 All notable changes to this project will be documented in this file.
 
 ---
-## [Unreleased]
+## [1.4.0] - 2026-03-30
+
+### Added
+- Queue worker liveness monitoring in dashboard health payload:
+    - `queue_worker.status` (`running`, `down`)
+    - `queue_worker.last_heartbeat_at`
+- Queue worker heartbeat mechanisms:
+    - scheduled heartbeat via `QueueHeartbeatJob`
+    - execution heartbeat updates in `ExecuteTaskRunJob`
+### Changed
+- Queue worker heartbeat is now hybrid (scheduled + task execution) so liveness detection also works when scheduler is unavailable but workers process tasks.
+
+### Docs
+- Updated docs with queue worker liveness behavior and `health.queue_worker.heartbeat_max_age_seconds` configuration.
+
+## [1.3.0] - 2026-03-30
 
 ### Added
 - Centralized task start blocking evaluator (`TaskStartBlockingEvaluator`) reused by UI state and backend guard logic.

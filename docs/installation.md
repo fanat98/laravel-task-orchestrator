@@ -78,6 +78,8 @@ Make sure a queue worker is running:
 php artisan queue:work
 ```
 
+Queue worker liveness monitoring uses heartbeat updates from scheduled queue heartbeat jobs and task execution jobs.
+
 ---
 
 ## 7. Access Dashboard

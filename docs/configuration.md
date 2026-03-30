@@ -121,6 +121,21 @@ Threshold (in seconds) used to classify queue state as `stuck`.
 
 ---
 
+### health.queue_worker.heartbeat_max_age_seconds
+
+Maximum age for queue worker heartbeat before worker state is considered `down`.
+
+```php
+60
+```
+
+Queue worker heartbeat is updated by:
+
+* scheduled `QueueHeartbeatJob`
+* task execution updates in `ExecuteTaskRunJob`
+
+---
+
 ### health.scheduler_heartbeat_cache_key
 
 Cache key used for scheduler heartbeat timestamp.

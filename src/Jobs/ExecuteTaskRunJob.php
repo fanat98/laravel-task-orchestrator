@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 use Malsa\TaskOrchestrator\Actions\ExecuteTaskRunAction;
 use Malsa\TaskOrchestrator\Domain\Enums\TaskRunStatus;
 use Malsa\TaskOrchestrator\Models\TaskRunRecord;
@@ -36,7 +37,13 @@ final class ExecuteTaskRunJob implements ShouldQueue
      */
     public function handle(ExecuteTaskRunAction $executeTaskRun): void
     {
-        $executeTaskRun->execute($this->taskRunId);
+        $this->touchQueueWorkerHeartbeat();
+
+        try {
+            $executeTaskRun->execute($this->taskRunId);
+        } finally {
+            $this->touchQueueWorkerHeartbeat();
+        }
     }
 
     public function failed(?Throwable $exception): void
@@ -63,5 +70,10 @@ final class ExecuteTaskRunJob implements ShouldQueue
             'failure_message' => $message,
             'finished_at' => now(),
         ]);
+    }
+
+    private function touchQueueWorkerHeartbeat(): void
+    {
+        Cache::put('task_orchestrator.queue_worker_heartbeat', now()->toIso8601String(), now()->addDay());
     }
 }
