@@ -200,8 +200,7 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
                         ->withoutOverlapping();
 
                     $schedule->command('task-orchestrator:record-scheduler-heartbeat')
-                        ->everyMinute()
-                        ->withoutOverlapping();
+                        ->everyMinute();
 
                     $schedule->job((new QueueHeartbeatJob())->onQueue('default'))
                         ->everyMinute();

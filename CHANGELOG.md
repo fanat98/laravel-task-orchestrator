@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 
 ---
+## [Unreleased]
+
+### Fixed
+- Removed overlap protection from the scheduled `task-orchestrator:record-scheduler-heartbeat` command so scheduler liveness heartbeats are not blocked by stale scheduler mutexes in Cloud Foundry / distributed environments.
+
 ## [1.4.0] - 2026-03-30
 
 ### Added
