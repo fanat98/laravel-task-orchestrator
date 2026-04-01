@@ -40,6 +40,8 @@
         id="task-orchestrator-dashboard-app"
         data-dashboard-api-url="{{ route('task-orchestrator.api.dashboard') }}"
         data-run-base-url="{{ url(config('task-orchestrator.route_prefix') . '/runs') }}"
+        data-runs-index-url="{{ route('task-orchestrator.runs.index') }}"
+        data-failed-runs-url="{{ route('task-orchestrator.runs.failed') }}"
         data-task-run-base-url="{{ url(config('task-orchestrator.route_prefix') . '/tasks') }}"
         data-csrf-token="{{ csrf_token() }}"
         data-initial-summary='@json($initialSummary)'

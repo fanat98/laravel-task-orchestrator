@@ -1,108 +1,158 @@
 <template>
     <div class="task-detail-page stack">
-        <div class="page-header task-detail-header">
-            <div>
-                <h1 class="page-title">{{ task.label }}</h1>
-                <p class="page-subtitle">Task: {{ task.name }}</p>
+        <!-- ── Header ──────────────────────────────────────────────────── -->
+        <div class="td-header">
+            <div class="td-header-left">
+                <h1 class="td-title">{{ task.label }}</h1>
+                <p class="td-subtitle">
+                    <span class="td-task-name">{{ task.name }}</span>
+                    <span v-if="task.description" class="td-task-desc">— {{ task.description }}</span>
+                </p>
             </div>
-
-            <div class="nav-actions">
-                <a class="button button-secondary" :href="taskIndexUrl">Back to tasks</a>
-
+            <div class="td-header-actions">
+                <a class="button button-secondary" :href="taskIndexUrl">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    Back
+                </a>
                 <form v-if="task.allow_manual_run" method="POST" :action="taskRunUrl">
                     <input type="hidden" name="_token" :value="csrfToken">
-                    <button
-                        class="button"
-                        type="submit"
-                        :disabled="!task.can_start"
-                        :title="startButtonTitle(task)"
-                    >
-                        ▶ Run task
+                    <button class="button" type="submit" :disabled="!task.can_start" :title="startButtonTitle(task)">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Run task
                     </button>
                 </form>
             </div>
         </div>
 
-        <div class="panel task-overview-panel">
-            <div class="panel-header">Task Overview</div>
+        <!-- ── Stat Cards Row ──────────────────────────────────────────── -->
+        <div class="td-stat-cards">
+            <div class="td-stat-card td-stat-card--group">
+                <div class="td-stat-body">
+                    <div class="td-stat-label">GROUP</div>
+                    <div class="td-stat-value">{{ task.group ?? '—' }}</div>
+                </div>
+                <div class="td-stat-icon td-stat-icon--group">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+            </div>
 
-            <div class="task-overview-content">
-                <div class="task-overview-cards">
-                    <div class="task-overview-item">
-                        <div class="task-overview-label">Group</div>
-                        <div class="task-overview-value">{{ task.group ?? '—' }}</div>
-                    </div>
-                    <div class="task-overview-item">
-                        <div class="task-overview-label">Queue</div>
-                        <div class="task-overview-value">{{ task.queue ?? '—' }}</div>
-                    </div>
-                    <div class="task-overview-item">
-                        <div class="task-overview-label">Timeout</div>
-                        <div class="task-overview-value">{{ task.timeout_minutes ? `${task.timeout_minutes} min` : '—' }}</div>
-                    </div>
-                    <div class="task-overview-item">
-                        <div class="task-overview-label">Last Status</div>
-                        <div class="task-overview-value">
-                            <span v-if="task.last_status" :class="['status-badge', `status-${task.last_status}`]">
-                                {{ capitalize(task.last_status) }}
-                            </span>
-                            <span v-else>—</span>
-                        </div>
-                    </div>
-                    <div class="task-overview-item">
-                        <div class="task-overview-label">Last Run</div>
-                        <div class="task-overview-value">{{ task.last_run_at ?? '—' }}</div>
+            <div class="td-stat-card">
+                <div class="td-stat-body">
+                    <div class="td-stat-label">QUEUE</div>
+                    <div class="td-stat-value">{{ task.queue ?? 'default' }}</div>
+                </div>
+                <div class="td-stat-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="td-stat-card">
+                <div class="td-stat-body">
+                    <div class="td-stat-label">TIMEOUT</div>
+                    <div class="td-stat-value">{{ task.timeout_minutes ? `${task.timeout_minutes} min` : '—' }}</div>
+                </div>
+                <div class="td-stat-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div :class="['td-stat-card', task.last_status === 'failed' ? 'td-stat-card--failed' : task.last_status === 'succeeded' ? 'td-stat-card--success' : '']">
+                <div class="td-stat-body">
+                    <div class="td-stat-label">LAST STATUS</div>
+                    <div class="td-stat-value">
+                        <span v-if="task.last_status" :class="['status-pill', `status-pill--${task.last_status}`]">
+                            {{ capitalize(task.last_status) }}
+                        </span>
+                        <span v-else>—</span>
                     </div>
                 </div>
+                <div :class="['td-stat-icon', task.last_status === 'failed' ? 'td-stat-icon--failed' : task.last_status === 'succeeded' ? 'td-stat-icon--success' : '']">
+                    <svg v-if="task.last_status === 'succeeded'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <svg v-else-if="task.last_status === 'failed'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                    <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+            </div>
 
-                <div class="task-overview-subsections">
-                    <div class="task-overview-section">
-                        <div class="task-overview-label">Dependencies</div>
-                        <div v-if="(task.depends_on || []).length === 0" class="muted">No dependencies</div>
-                        <div v-else class="task-dependencies">
-                            <span
-                                v-for="dependency in task.depends_on"
-                                :key="dependency"
-                                class="badge badge-dependency"
-                            >
-                                {{ dependency }}
-                            </span>
-                        </div>
+            <div class="td-stat-card">
+                <div class="td-stat-body">
+                    <div class="td-stat-label">LAST RUN</div>
+                    <div class="td-stat-value td-stat-value--small">{{ task.last_run_at ?? '—' }}</div>
+                </div>
+                <div class="td-stat-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Info Sections Row ───────────────────────────────────────── -->
+        <div class="td-info-row">
+            <div class="td-info-card">
+                <div class="td-info-header">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                    </svg>
+                    Dependencies
+                </div>
+                <div class="td-info-body">
+                    <div v-if="(task.depends_on || []).length === 0" class="muted">No dependencies</div>
+                    <div v-else class="td-dep-list">
+                        <span v-for="dep in task.depends_on" :key="dep" class="task-dep-badge">{{ dep }}</span>
                     </div>
+                </div>
+            </div>
 
-                    <div class="task-overview-section">
-                        <div class="task-overview-label">Recent Runs</div>
-                        <div v-if="recentRuns.length === 0" class="empty">No runs yet.</div>
-                        <div v-else class="task-recent-runs">
-                            <a
-                                v-for="run in recentRuns"
-                                :key="run.id"
-                                :href="buildRunUrl(run.id)"
-                                :title="buildRunTitle(run)"
-                                :class="['task-run-dot', `task-run-dot-${run.status}`]"
-                            ></a>
-                        </div>
+            <div class="td-info-card">
+                <div class="td-info-header">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.08"/>
+                    </svg>
+                    Recent Runs
+                </div>
+                <div class="td-info-body">
+                    <div v-if="recentRuns.length === 0" class="muted">No runs yet</div>
+                    <div v-else class="td-run-dots">
+                        <a
+                            v-for="run in recentRuns"
+                            :key="run.id"
+                            :href="buildRunUrl(run.id)"
+                            :title="buildRunTitle(run)"
+                            :class="['run-dot', `run-dot--${run.status}`]"
+                        ></a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="panel">
-            <div class="task-tabs-shell">
-                <div class="task-tabs">
-                    <button
-                        v-for="tab in tabs"
-                        :key="tab.key"
-                        :class="['task-tab-button', { 'is-active': activeTab === tab.key }]"
-                        type="button"
-                        @click="selectTab(tab.key)"
-                    >
-                        {{ tab.label }}
-                    </button>
-                </div>
+        <!-- ── Tabs Panel ──────────────────────────────────────────────── -->
+        <div class="td-tabs-panel">
+            <div class="td-tabs-bar">
+                <button
+                    v-for="tab in tabs"
+                    :key="tab.key"
+                    :class="['td-tab', { 'td-tab--active': activeTab === tab.key }]"
+                    type="button"
+                    @click="selectTab(tab.key)"
+                >
+                    {{ tab.label }}
+                </button>
             </div>
 
-            <div class="task-tab-content">
+            <div class="td-tab-content">
+                <!-- Runs tab -->
                 <div v-if="activeTab === 'runs'" class="task-tab-pane">
                     <div v-if="tabLoading.runs" class="muted">Loading runs...</div>
                     <div v-else-if="runsTab.data.length === 0" class="empty">No run history found.</div>
@@ -119,10 +169,8 @@
                             </thead>
                             <tbody>
                             <tr v-for="run in runsTab.data" :key="run.id">
-                                <td><a :href="buildRunUrl(run.id)">{{ run.id }}</a></td>
-                                <td>
-                                    <span :class="['status-badge', `status-${run.status}`]">{{ capitalize(run.status) }}</span>
-                                </td>
+                                <td class="run-id"><a :href="buildRunUrl(run.id)">{{ String(run.id).slice(0, 6) }}</a></td>
+                                <td><span :class="['status-pill', `status-pill--${run.status}`]">{{ capitalize(run.status) }}</span></td>
                                 <td>{{ capitalize(run.trigger) }}</td>
                                 <td>{{ run.started_at ?? '—' }}</td>
                                 <td>{{ run.duration === null ? '—' : `${run.duration}s` }}</td>
@@ -130,14 +178,14 @@
                             </tbody>
                         </table>
                     </div>
-
                     <div class="task-tab-pagination">
-                        <button class="button button-small" :disabled="runsTab.meta.current_page <= 1" @click="loadRuns(runsTab.meta.current_page - 1)">Prev</button>
+                        <button class="button button-small button-secondary" :disabled="runsTab.meta.current_page <= 1" @click="loadRuns(runsTab.meta.current_page - 1)">Prev</button>
                         <span class="muted">Page {{ runsTab.meta.current_page }} / {{ runsTab.meta.last_page }}</span>
-                        <button class="button button-small" :disabled="runsTab.meta.current_page >= runsTab.meta.last_page" @click="loadRuns(runsTab.meta.current_page + 1)">Next</button>
+                        <button class="button button-small button-secondary" :disabled="runsTab.meta.current_page >= runsTab.meta.last_page" @click="loadRuns(runsTab.meta.current_page + 1)">Next</button>
                     </div>
                 </div>
 
+                <!-- Failures tab -->
                 <div v-else-if="activeTab === 'failures'" class="task-tab-pane">
                     <div v-if="tabLoading.failures" class="muted">Loading failures...</div>
                     <div v-else-if="failuresTab.data.length === 0" class="empty">No failed runs found.</div>
@@ -152,28 +200,27 @@
                             </thead>
                             <tbody>
                             <tr v-for="run in failuresTab.data" :key="run.id">
-                                <td><a :href="buildRunUrl(run.id)">{{ run.id }}</a></td>
+                                <td class="run-id"><a :href="buildRunUrl(run.id)">{{ String(run.id).slice(0, 6) }}</a></td>
                                 <td>{{ run.finished_at ?? '—' }}</td>
                                 <td class="wrap-text">{{ run.failure_message ?? '—' }}</td>
                             </tr>
                             </tbody>
                         </table>
                     </div>
-
                     <div class="task-tab-pagination">
-                        <button class="button button-small" :disabled="failuresTab.meta.current_page <= 1" @click="loadFailures(failuresTab.meta.current_page - 1)">Prev</button>
+                        <button class="button button-small button-secondary" :disabled="failuresTab.meta.current_page <= 1" @click="loadFailures(failuresTab.meta.current_page - 1)">Prev</button>
                         <span class="muted">Page {{ failuresTab.meta.current_page }} / {{ failuresTab.meta.last_page }}</span>
-                        <button class="button button-small" :disabled="failuresTab.meta.current_page >= failuresTab.meta.last_page" @click="loadFailures(failuresTab.meta.current_page + 1)">Next</button>
+                        <button class="button button-small button-secondary" :disabled="failuresTab.meta.current_page >= failuresTab.meta.last_page" @click="loadFailures(failuresTab.meta.current_page + 1)">Next</button>
                     </div>
                 </div>
 
+                <!-- Logs tab -->
                 <div v-else-if="activeTab === 'logs'" class="task-tab-pane">
                     <div v-if="tabLoading.logs" class="muted">Loading logs...</div>
                     <template v-else>
-                        <div v-if="logsTab.selected_run_id" class="muted" style="margin-bottom: 0.6rem;">
-                            Latest run: {{ logsTab.selected_run_id }}
+                        <div v-if="logsTab.selected_run_id" class="td-log-run-label">
+                            Latest run: <strong>{{ String(logsTab.selected_run_id).slice(0, 6) }}</strong>
                         </div>
-
                         <div v-if="logsTab.logs.length === 0" class="empty">No logs found for the latest run.</div>
                         <div v-else class="log-list">
                             <div v-for="log in logsTab.logs" :key="log.id" class="log-entry">
@@ -184,15 +231,16 @@
                     </template>
                 </div>
 
+                <!-- Documentation tab -->
                 <div v-else-if="activeTab === 'documentation'" class="task-tab-pane">
                     <div v-if="tabLoading.documentation" class="muted">Loading documentation...</div>
                     <template v-else>
-                        <div class="task-doc-block">
-                            <div class="task-overview-label">Description</div>
+                        <div class="td-doc-section">
+                            <div class="td-doc-label">Description</div>
                             <div class="wrap-text">{{ docsTab.description ?? '—' }}</div>
                         </div>
-                        <div class="task-doc-block">
-                            <div class="task-overview-label">Documentation</div>
+                        <div class="td-doc-section">
+                            <div class="td-doc-label">Documentation</div>
                             <div class="wrap-text">{{ docsTab.documentation ?? '—' }}</div>
                         </div>
                     </template>

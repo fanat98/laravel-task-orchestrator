@@ -3,7 +3,30 @@
 All notable changes to this project will be documented in this file.
 
 ---
-## [Unreleased]
+## [1.5.0] - 2026-04-01
+
+### Added
+- Topbar redesign: logo icon, sticky positioning, active-state navigation indicators, user avatar with initials, and dedicated theme toggle with sun/moon SVG icons.
+- Dashboard stat cards with accent-colored left borders, icons, and hover elevation effects.
+- Health monitoring row: large status indicator with icon, status pills for queue/scheduler/worker, and metric cards with animated progress bars.
+- Task group panels with color-coded group icons, inline run-history dots, dependency badges, schedule/trigger tags, and live progress bars for running tasks.
+- Recent runs and failed runs panels with structured table layout and failure detail display.
+- Task detail page: stat cards row (group, queue, timeout, last status, last run), info cards for dependencies and run history, and polished tab bar with pagination.
+- Pagination component with styled page links, ellipsis, and navigation buttons.
+
+### Changed
+- Full CSS rewrite from basic utility styles to a comprehensive design-system approach with design tokens, consistent spacing, shadows, and border-radius variables.
+- Dashboard layout restructured from simple card grid to a rich multi-section dashboard (stat cards → health row → grouped tasks → recent/failed runs).
+- Theme toggle improved: respects `prefers-color-scheme` on first visit, persists choice in `localStorage`, and toggles sun/moon icons instead of emoji.
+- Topbar navigation now highlights the active route with an accent-colored underline indicator.
+- Task detail page tabs bar: increased gap between tabs and added bottom padding so tabs no longer sit on the border.
+- Task detail page tab pagination: buttons now have proper spacing (`1rem` gap) with a subtle top border separator.
+
+### Fixed
+- Tabs in `.td-tabs-bar` had no bottom spacing causing them to overlap the border line.
+- Pagination buttons in `.task-tab-pagination` were missing styles entirely, causing them to render without any gap.
+
+## [1.4.1] - 2026-03-31
 
 ### Fixed
 - Removed overlap protection from the scheduled `task-orchestrator:record-scheduler-heartbeat` command so scheduler liveness heartbeats are not blocked by stale scheduler mutexes in Cloud Foundry / distributed environments.

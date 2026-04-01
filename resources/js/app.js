@@ -10,6 +10,8 @@ if (dashboardElement) {
     createApp(TaskOrchestratorDashboardApp, {
         dashboardApiUrl: dashboardElement.dataset.dashboardApiUrl,
         runBaseUrl: dashboardElement.dataset.runBaseUrl,
+        runsIndexUrl: dashboardElement.dataset.runsIndexUrl,
+        failedRunsUrl: dashboardElement.dataset.failedRunsUrl,
         taskRunBaseUrl: dashboardElement.dataset.taskRunBaseUrl,
         csrfToken: dashboardElement.dataset.csrfToken,
         initialSummary: JSON.parse(dashboardElement.dataset.initialSummary || '{}'),
@@ -60,16 +62,24 @@ if (taskDetailElement) {
     const root = document.documentElement;
     const toggle = document.getElementById('theme-toggle');
 
-    // Load saved theme
+    function applyTheme(theme) {
+        root.setAttribute('data-theme', theme);
+
+        if (toggle) {
+            const moon = toggle.querySelector('.icon-moon');
+            const sun = toggle.querySelector('.icon-sun');
+
+            if (moon) moon.style.display = theme === 'dark' ? 'none' : '';
+            if (sun) sun.style.display = theme === 'dark' ? '' : 'none';
+        }
+    }
+
+    // Determine initial theme
     const saved = localStorage.getItem(KEY);
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initial = saved ?? (prefersDark ? 'dark' : 'light');
 
-    if (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        root.setAttribute('data-theme', 'dark');
-    }
-
-    if (saved) {
-        root.setAttribute('data-theme', saved);
-    }
+    applyTheme(initial);
 
     if (!toggle) return;
 
@@ -77,15 +87,9 @@ if (taskDetailElement) {
         const current = root.getAttribute('data-theme');
         const next = current === 'dark' ? 'light' : 'dark';
 
-        root.setAttribute('data-theme', next);
+        applyTheme(next);
         localStorage.setItem(KEY, next);
-
-        toggle.textContent = next === 'dark' ? '☀️' : '🌙';
     });
-
-    // Set initial icon
-    const current = root.getAttribute('data-theme');
-    toggle.textContent = current === 'dark' ? '☀️' : '🌙';
 })();
 
 
