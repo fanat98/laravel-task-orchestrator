@@ -20,7 +20,9 @@ final class TaskRunRecord extends OrchestratorModel
     {
         return [
             'command_arguments' => 'array',
+            'timeout_seconds' => 'integer',
             'started_at' => 'datetime',
+            'timeout_at' => 'datetime',
             'finished_at' => 'datetime',
         ];
     }

@@ -45,6 +45,11 @@ final readonly class StartTaskAction
 
         $taskRunId = (string) Str::uuid();
 
+        $timeoutSeconds = max(
+            (int) (($definition->timeoutMinutes ?? (int) config('task-orchestrator.stale_run_default_minutes', 10)) * 60),
+            60
+        );
+
 
         $record = TaskRunRecord::query()->create([
             'id' => $taskRunId,
@@ -55,14 +60,11 @@ final readonly class StartTaskAction
             'status' => TaskRunStatus::Queued->value,
             'trigger_type' => $triggerType,
             'pipeline_id' => $pipelineId,
+            'timeout_seconds' => $timeoutSeconds,
             'started_at' => null,
             'finished_at' => null,
         ]);
 
-        $timeoutSeconds = max(
-            (int) (($definition->timeoutMinutes ?? (int) config('task-orchestrator.stale_run_default_minutes', 10)) * 60),
-            60
-        );
 
 
         $dispatch = ExecuteTaskRunJob::dispatch($taskRunId, $timeoutSeconds);

@@ -28,9 +28,23 @@ final class ExecuteTaskRunAction
     {
         $run = TaskRunRecord::query()->findOrFail($taskRunId);
 
+        if (in_array($run->status, [
+            TaskRunStatus::Succeeded->value,
+            TaskRunStatus::Failed->value,
+            TaskRunStatus::Cancelled->value,
+        ], true)) {
+            return;
+        }
+
+        $startedAt = $run->started_at ?? now();
+        $timeoutAt = $run->timeout_at ?? $startedAt->copy()->addSeconds(
+            $this->resolveTimeoutSeconds($run)
+        );
+
         $run->update([
             'status' => TaskRunStatus::Running->value,
-            'started_at' => now(),
+            'started_at' => $startedAt,
+            'timeout_at' => $timeoutAt,
             'finished_at' => null,
             'failure_message' => null,
         ]);
@@ -101,5 +115,13 @@ final class ExecuteTaskRunAction
         } finally {
             $this->currentTaskRunStore->clear();
         }
+    }
+
+    private function resolveTimeoutSeconds(TaskRunRecord $run): int
+    {
+        return max(
+            (int) ($run->timeout_seconds ?? ((int) config('task-orchestrator.stale_run_default_minutes', 10) * 60)),
+            60
+        );
     }
 }

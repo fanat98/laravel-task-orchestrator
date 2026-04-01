@@ -25,6 +25,7 @@ final class RecoverStaleTaskRunsCommand extends Command
     {
         $globalOverrideMinutes = $this->option('minutes');
         $defaultMinutes = (int) config('task-orchestrator.stale_run_default_minutes', 10);
+        $now = now();
 
         $runs = TaskRunRecord::query()
             ->whereIn('status', [
@@ -36,21 +37,16 @@ final class RecoverStaleTaskRunsCommand extends Command
         $recovered = 0;
 
         foreach ($runs as $run) {
-            $task = $this->tasks->find($run->task_name);
+            $timeoutSeconds = $this->resolveTimeoutSeconds($run, $globalOverrideMinutes, $defaultMinutes);
+            $deadline = $this->resolveDeadline($run, $timeoutSeconds, $globalOverrideMinutes !== null);
 
-            $minutes = $globalOverrideMinutes !== null
-                ? max((int) $globalOverrideMinutes, 1)
-                : max((int) ($task?->timeoutMinutes ?? $defaultMinutes), 1);
-
-            $cutoff = now()->subMinutes($minutes);
-
-            $isStale = $run->started_at !== null
-                ? $run->started_at->lessThanOrEqualTo($cutoff)
-                : $run->created_at->lessThanOrEqualTo($cutoff);
+            $isStale = $deadline !== null && $deadline->lessThanOrEqualTo($now);
 
             if (! $isStale) {
                 continue;
             }
+
+            $minutes = max((int) ceil($timeoutSeconds / 60), 1);
 
             $run->update([
                 'status' => TaskRunStatus::Failed->value,
@@ -81,5 +77,35 @@ final class RecoverStaleTaskRunsCommand extends Command
         $this->info(sprintf('Recovered %d stale run(s).', $recovered));
 
         return self::SUCCESS;
+    }
+
+    private function resolveTimeoutSeconds(TaskRunRecord $run, mixed $globalOverrideMinutes, int $defaultMinutes): int
+    {
+        if ($globalOverrideMinutes !== null) {
+            return max((int) $globalOverrideMinutes * 60, 60);
+        }
+
+        if ($run->timeout_seconds !== null) {
+            return max((int) $run->timeout_seconds, 60);
+        }
+
+        $task = $this->tasks->find($run->task_name);
+
+        return max((int) (($task?->timeoutMinutes ?? $defaultMinutes) * 60), 60);
+    }
+
+    private function resolveDeadline(TaskRunRecord $run, int $timeoutSeconds, bool $hasGlobalOverride): ?\Illuminate\Support\Carbon
+    {
+        if (! $hasGlobalOverride && $run->timeout_at !== null) {
+            return $run->timeout_at;
+        }
+
+        $anchor = $run->started_at ?? $run->created_at;
+
+        if ($anchor === null) {
+            return null;
+        }
+
+        return $anchor->copy()->addSeconds($timeoutSeconds);
     }
 }

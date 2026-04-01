@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 
 ---
+## [1.5.1] - 2026-04-01
+
+### Added
+- Persistent per-run timeout tracking on `task_runs` via `timeout_seconds` and `timeout_at` so stale-run handling no longer depends solely on the current task definition.
+- Regression coverage for task dispatch timeout persistence, stale-run recovery, and preserving original run deadlines across repeated processing attempts.
+
+### Changed
+- `StartTaskAction` now stores the effective timeout on the task run record when dispatching `ExecuteTaskRunJob`.
+- `ExecuteTaskRunAction` now preserves an existing run's original `started_at` and `timeout_at` values instead of resetting them on a later execution attempt.
+- `RecoverStaleTaskRunsCommand` now resolves stale runs primarily from persisted per-run timeout data, while still supporting explicit global timeout overrides.
+
+### Fixed
+- Fixed stale task runs remaining stuck in `running` after their configured timeout when worker timeout failure hooks were not reached reliably.
+- Fixed recovery behavior for long-running tasks whose timeout definition changed after the run had already been queued or started.
+
 ## [1.5.0] - 2026-04-01
 
 ### Added
