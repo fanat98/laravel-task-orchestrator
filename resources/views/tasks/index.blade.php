@@ -53,6 +53,7 @@
                         <td>
                             @if ($task['schedule'])
                                 <span class="badge badge-trigger-scheduled">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                     {{ $task['schedule']['human'] ?? $task['schedule']['expression'] }}
                                 </span>
                             @else
@@ -79,7 +80,28 @@
                         </td>
                         <td>
                             @if ($task['last_status'])
-                                <span class="status-badge status-{{ $task['last_status'] }}">
+                                <span class="status-pill status-pill--{{ $task['last_status'] }}">
+                                    @if($task['last_status'] === 'succeeded')
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                                        </svg>
+                                    @elseif($task['last_status'] === 'failed')
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                        </svg>
+                                    @elseif($task['last_status'] === 'running')
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16"/>
+                                        </svg>
+                                    @elseif($task['last_status'] === 'queued')
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                                        </svg>
+                                    @else
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                        </svg>
+                                    @endif
                                     {{ ucfirst($task['last_status']) }}
                                 </span>
                             @else

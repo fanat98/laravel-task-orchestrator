@@ -128,9 +128,72 @@
                 <div class="group-panel-header">
                     <div class="group-panel-title">
                         <div :class="['group-panel-icon', `group-panel-icon--${groupIdx % 5}`]">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                            </svg>
+                            <!-- ETL Imports -->
+                            <template v-if="group.name.toLowerCase().includes('etl') || group.name.toLowerCase().includes('import')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                            </template>
+                            <!-- User Management -->
+                            <template v-else-if="group.name.toLowerCase().includes('user') || group.name.toLowerCase().includes('workforce') || group.name.toLowerCase().includes('identity')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                            </template>
+                            <!-- Control Verification / Compliance -->
+                            <template v-else-if="group.name.toLowerCase().includes('control') || group.name.toLowerCase().includes('verification') || group.name.toLowerCase().includes('compliance')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>
+                                </svg>
+                            </template>
+                            <!-- Monitoring / Health -->
+                            <template v-else-if="group.name.toLowerCase().includes('monitor') || group.name.toLowerCase().includes('health') || group.name.toLowerCase().includes('watch')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                </svg>
+                            </template>
+                            <!-- Notifications / Mail -->
+                            <template v-else-if="group.name.toLowerCase().includes('notification') || group.name.toLowerCase().includes('mail') || group.name.toLowerCase().includes('alert')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                                </svg>
+                            </template>
+                            <!-- Database / Storage -->
+                            <template v-else-if="group.name.toLowerCase().includes('database') || group.name.toLowerCase().includes('storage') || group.name.toLowerCase().includes('backup')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                                </svg>
+                            </template>
+                            <!-- API / Integration -->
+                            <template v-else-if="group.name.toLowerCase().includes('api') || group.name.toLowerCase().includes('integration') || group.name.toLowerCase().includes('sync')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 16l3-8 3 8-6-2-6 2z"/><path d="M2 16l3-8 3 8-6-2-6 2z"/><path d="M7 21h10"/><path d="M12 3v18"/>
+                                </svg>
+                            </template>
+                            <!-- Reports / Analytics -->
+                            <template v-else-if="group.name.toLowerCase().includes('report') || group.name.toLowerCase().includes('analytics') || group.name.toLowerCase().includes('stats')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                                </svg>
+                            </template>
+                            <!-- Security -->
+                            <template v-else-if="group.name.toLowerCase().includes('security') || group.name.toLowerCase().includes('auth') || group.name.toLowerCase().includes('permission')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><circle cx="12" cy="16" r="1"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                            </template>
+                            <!-- Cleanup / Maintenance -->
+                            <template v-else-if="group.name.toLowerCase().includes('cleanup') || group.name.toLowerCase().includes('maintenance') || group.name.toLowerCase().includes('delete')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
+                            </template>
+                            <!-- Default fallback -->
+                            <template v-else>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                            </template>
                         </div>
                         {{ group.name }}
                     </div>
@@ -150,6 +213,34 @@
                                 </div>
                                 <div class="task-item-badges">
                                     <span v-if="task.last_status" :class="['status-pill', `status-pill--${task.last_status}`]">
+                                        <!-- Succeeded Icon -->
+                                        <svg v-if="task.last_status === 'succeeded'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                                        </svg>
+                                        <!-- Failed Icon -->
+                                        <svg v-else-if="task.last_status === 'failed'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                        </svg>
+                                        <!-- Running Icon -->
+                                        <svg v-else-if="task.last_status === 'running'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16"/>
+                                        </svg>
+                                        <!-- Queued Icon -->
+                                        <svg v-else-if="task.last_status === 'queued'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                                        </svg>
+                                        <!-- Cancelled Icon -->
+                                        <svg v-else-if="task.last_status === 'cancelled'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                                        </svg>
+                                        <!-- Pending Icon -->
+                                        <svg v-else-if="task.last_status === 'pending'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                        </svg>
+                                        <!-- Default Icon -->
+                                        <svg v-else width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                        </svg>
                                         {{ taskStatusLabel(task) }}
                                     </span>
                                 </div>
@@ -264,7 +355,33 @@
                         <tr v-for="run in latestRuns" :key="run.id">
                             <td class="run-id"><a :href="buildRunUrl(run.id)">{{ String(run.id).slice(0, 6) }}</a></td>
                             <td class="run-task">{{ run.task_label }}</td>
-                            <td><span :class="['status-pill', `status-pill--${run.status}`]">{{ capitalize(run.status) }}</span></td>
+                            <td><span :class="['status-pill', `status-pill--${run.status}`]">
+                                <!-- Succeeded Icon -->
+                                <svg v-if="run.status === 'succeeded'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                                <!-- Failed Icon -->
+                                <svg v-else-if="run.status === 'failed'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                </svg>
+                                <!-- Running Icon -->
+                                <svg v-else-if="run.status === 'running'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16"/>
+                                </svg>
+                                <!-- Queued Icon -->
+                                <svg v-else-if="run.status === 'queued'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                                <!-- Cancelled Icon -->
+                                <svg v-else-if="run.status === 'cancelled'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                                </svg>
+                                <!-- Default Icon -->
+                                <svg v-else width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                </svg>
+                                {{ capitalize(run.status) }}
+                            </span></td>
                             <td class="run-trigger">{{ capitalize(run.trigger_type) }}</td>
                             <td class="run-ts">{{ timeAgo(run.started_at) }}</td>
                         </tr>
@@ -349,6 +466,23 @@ function formatAge(seconds) {
     if (seconds < 60) return `${seconds}s`
     if (seconds < 3600) return `${(seconds / 60).toFixed(1)}m`
     return `${(seconds / 3600).toFixed(1)}h`
+}
+
+function formatDuration(seconds) {
+    if (seconds === null || seconds === undefined) return '—'
+    
+    const sec = parseInt(seconds)
+    if (sec < 60) {
+        return `${sec}s`
+    } else if (sec < 3600) {
+        const minutes = Math.floor(sec / 60)
+        const remainingSeconds = sec % 60
+        return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`
+    } else {
+        const hours = Math.floor(sec / 3600)
+        const minutes = Math.floor((sec % 3600) / 60)
+        return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
+    }
 }
 
 function timeAgo(dateString) {

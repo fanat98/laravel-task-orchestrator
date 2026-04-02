@@ -67,6 +67,26 @@
                     <div class="td-stat-label">LAST STATUS</div>
                     <div class="td-stat-value">
                         <span v-if="task.last_status" :class="['status-pill', `status-pill--${task.last_status}`]">
+                            <!-- Succeeded Icon -->
+                            <svg v-if="task.last_status === 'succeeded'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <!-- Failed Icon -->
+                            <svg v-else-if="task.last_status === 'failed'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            <!-- Running Icon -->
+                            <svg v-else-if="task.last_status === 'running'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16"/>
+                            </svg>
+                            <!-- Queued Icon -->
+                            <svg v-else-if="task.last_status === 'queued'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            <!-- Default Icon -->
+                            <svg v-else width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
                             {{ capitalize(task.last_status) }}
                         </span>
                         <span v-else>—</span>
@@ -170,10 +190,46 @@
                             <tbody>
                             <tr v-for="run in runsTab.data" :key="run.id">
                                 <td class="run-id"><a :href="buildRunUrl(run.id)">{{ String(run.id).slice(0, 6) }}</a></td>
-                                <td><span :class="['status-pill', `status-pill--${run.status}`]">{{ capitalize(run.status) }}</span></td>
-                                <td>{{ capitalize(run.trigger) }}</td>
+                                <td><span :class="['status-pill', `status-pill--${run.status}`]">
+                                    <!-- Succeeded Icon -->
+                                    <svg v-if="run.status === 'succeeded'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                                    </svg>
+                                    <!-- Failed Icon -->
+                                    <svg v-else-if="run.status === 'failed'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                    </svg>
+                                    <!-- Running Icon -->
+                                    <svg v-else-if="run.status === 'running'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16"/>
+                                    </svg>
+                                    <!-- Queued Icon -->
+                                    <svg v-else-if="run.status === 'queued'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    <!-- Default Icon -->
+                                    <svg v-else width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                    {{ capitalize(run.status) }}
+                                </span></td>
+                                <td>
+                                    <span :class="['badge', `badge-trigger-${run.trigger || 'manual'}`]">
+                                        <!-- Pipeline icon -->
+                                        <svg v-if="run.trigger === 'pipeline'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                        <!-- Scheduled icon -->
+                                        <svg v-else-if="run.trigger === 'scheduled'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                        <!-- Manual icon -->
+                                        <svg v-else-if="run.trigger === 'manual'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-6 0v4"/><rect x="2" y="9" width="20" height="13" rx="2"/></svg>
+                                        <!-- Retry icon -->
+                                        <svg v-else-if="run.trigger === 'retry'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.08"/></svg>
+                                        <!-- Default icon -->
+                                        <svg v-else width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                        {{ capitalize(run.trigger) }}
+                                    </span>
+                                </td>
                                 <td>{{ run.started_at ?? '—' }}</td>
-                                <td>{{ run.duration === null ? '—' : `${run.duration}s` }}</td>
+                                <td>{{ formatDuration(run.duration) }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -311,6 +367,23 @@ const docsTab = ref({ description: null, documentation: null })
 function capitalize(value) {
     if (!value) return ''
     return String(value).charAt(0).toUpperCase() + String(value).slice(1)
+}
+
+function formatDuration(seconds) {
+    if (seconds === null || seconds === undefined) return '—'
+    
+    const sec = parseInt(seconds)
+    if (sec < 60) {
+        return `${sec}s`
+    } else if (sec < 3600) {
+        const minutes = Math.floor(sec / 60)
+        const remainingSeconds = sec % 60
+        return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`
+    } else {
+        const hours = Math.floor(sec / 3600)
+        const minutes = Math.floor((sec % 3600) / 60)
+        return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
+    }
 }
 
 function buildRunUrl(runId) {

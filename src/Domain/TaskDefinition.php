@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Malsa\TaskOrchestrator\Domain;
 
-final class TaskDefinition
+final readonly class TaskDefinition
 {
     /**
      * @param array<string|int, mixed> $arguments
@@ -15,21 +15,21 @@ final class TaskDefinition
      * @param array<int, string> $dependsOn
      */
     private function __construct(
-        public readonly string $name,
-        public readonly string $label,
-        public readonly ?string $description,
-        public readonly ?string $command,
-        public readonly array $arguments,
-        public readonly ?string $group,
-        public readonly ?int $groupOrder,
-        public readonly ?int $order,
-        public readonly ?array $schedule,
-        public readonly array $dependsOn,
-        public readonly ?int $timeoutMinutes,
-        public readonly bool $allowManualRun,
-        public readonly bool $allowConcurrentRuns,
-        public readonly ?string $queue,
-        public readonly ?string $connection,
+        public string  $name,
+        public string  $label,
+        public ?string $description,
+        public ?string $command,
+        public array   $arguments,
+        public ?string $group,
+        public ?int    $groupOrder,
+        public ?int    $order,
+        public ?array  $schedule,
+        public array   $dependsOn,
+        public ?int    $timeoutMinutes,
+        public bool    $allowManualRun,
+        public bool    $allowConcurrentRuns,
+        public ?string $queue,
+        public ?string $connection,
     ) {
         if ($this->name === '') {
             throw new \InvalidArgumentException('Task name cannot be empty.');

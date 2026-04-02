@@ -42,7 +42,7 @@
                         <tr>
                             <td>
                                 <a href="{{ route('task-orchestrator.runs.show', $run->id) }}">
-                                    {{ $run->id }}
+                                    {{ Str::limit($run->id, 6, '') }}
                                 </a>
                             </td>
 
@@ -51,22 +51,58 @@
                             </td>
 
                             <td>
-                        <span class="status-badge status-{{ $run->status }}">
-                            {{ ucfirst($run->status) }}
-                        </span>
+                                <span class="status-pill status-pill--{{ $run->status }}">
+                                    @if($run->status === 'succeeded')
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                                        </svg>
+                                    @elseif($run->status === 'failed')
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                        </svg>
+                                    @elseif($run->status === 'running')
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16"/>
+                                        </svg>
+                                    @elseif($run->status === 'queued')
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                                        </svg>
+                                    @elseif($run->status === 'cancelled')
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                                        </svg>
+                                    @else
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                        </svg>
+                                    @endif
+                                    {{ ucfirst($run->status) }}
+                                </span>
                             </td>
 
                             <td>
-                        <span class="badge
-                            @if (($run->trigger_type ?? 'manual') === 'scheduled') badge-trigger-scheduled
-                            @elseif (($run->trigger_type ?? 'manual') === 'pipeline') badge-trigger-pipeline
-                            @elseif (($run->trigger_type ?? 'manual') === 'retry') badge-trigger-retry
-                            @elseif (($run->trigger_type ?? 'manual') === 'manual') badge-trigger-manual
-                            @else badge-trigger-default
-                            @endif
-                        ">
-                            {{ ucfirst($run->trigger_type ?? 'manual') }}
-                        </span>
+                                <span class="badge
+                                    @if (($run->trigger_type ?? 'manual') === 'scheduled') badge-trigger-scheduled
+                                    @elseif (($run->trigger_type ?? 'manual') === 'pipeline') badge-trigger-pipeline
+                                    @elseif (($run->trigger_type ?? 'manual') === 'retry') badge-trigger-retry
+                                    @elseif (($run->trigger_type ?? 'manual') === 'manual') badge-trigger-manual
+                                    @else badge-trigger-default
+                                    @endif
+                                ">
+                                    @if (($run->trigger_type ?? 'manual') === 'pipeline')
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                    @elseif (($run->trigger_type ?? 'manual') === 'scheduled')
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    @elseif (($run->trigger_type ?? 'manual') === 'manual')
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-6 0v4"/><rect x="2" y="9" width="20" height="13" rx="2"/></svg>
+                                    @elseif (($run->trigger_type ?? 'manual') === 'retry')
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.08"/></svg>
+                                    @else
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                    @endif
+                                    {{ ucfirst($run->trigger_type ?? 'manual') }}
+                                </span>
                             </td>
 
                             <td class="hide-sm">

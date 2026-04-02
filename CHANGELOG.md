@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 
 ---
+## [1.6.0] - 2026-04-02
+
+### 🎨 Enhanced
+- **UI/UX Consistency Overhaul**: Complete visual redesign for consistent user experience across all views
+- **Status Badges**: Added thematic icons to all status badges (succeeded ✅, failed ❌, running ▶️, queued ⏰, cancelled ⛔)
+- **Trigger Badges**: Enhanced trigger badges with contextual icons (pipeline 🔗, scheduled ⏰, manual 🔒, retry 🔄)
+- **Group Icons**: Intelligent thematic icons for task groups based on naming patterns (ETL 📥, Users 👥, Security 🔒, etc.)
+- **Duration Formatting**: Smart duration display (45s, 22m 15s, 2h 15m) replacing raw seconds for better readability
+- **UUID Optimization**: Shortened UUIDs to 6-8 characters across all tables and cards for cleaner interface
+- **Health Animation**: Added subtle breathing animation to dashboard health icon for enhanced visual feedback
+- **Button Consistency**: Unified button styling with proper icons across Run Detail and Task Detail views
+
+### 🔧 Improved
+- **Badge Styling**: Consistent flexbox layout, unified heights, and proper icon-text alignment
+- **CSS Architecture**: Enhanced badge and pill classes with better symmetry and spacing
+- **Navigation Flow**: Improved button placement and icon consistency in detail views
+- **Visual Hierarchy**: Better contrast and spacing for improved readability
+
+### 🎯 Technical
+- **Icon System**: Comprehensive SVG icon library with consistent sizing (10px-14px) and stroke weights
+- **CSS Classes**: Migrated from `status-badge` to `status-pill` for better consistency
+- **Component Harmony**: Unified design patterns across Vue components and Blade templates
+- **Responsive Design**: Maintained mobile-friendly layouts while enhancing desktop experience
+
+---
 ## [1.5.1] - 2026-04-01
 
 ### Added
