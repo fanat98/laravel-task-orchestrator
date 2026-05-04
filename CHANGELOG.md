@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 
 ---
+## [1.6.1] - 2026-05-04
+
+### Fixed
+- **Queue flood prevention**: `QueueHeartbeatJob` now implements `ShouldBeUnique` with a 120-second lock to prevent thousands of duplicate jobs accumulating when the queue worker is down.
+- **Scheduled task guard**: `RunScheduledTaskCommand` now checks queue worker heartbeat health before dispatching. When the queue worker is down, scheduled tasks are skipped with a warning instead of creating orphaned task run records.
+- **Run history ordering**: Replaced `latest('started_at'), latest('created_at')` with `COALESCE(finished_at, started_at, created_at) DESC` across all run queries. Runs with `NULL started_at` (stale queued runs marked as failed) now sort correctly by their most recent activity timestamp.
+
+### Changed
+- `DashboardController`, `DashboardStatusController`, `TaskRunIndexController`, `FailedTaskRunIndexController`, `TaskDetailDataProvider`, and `TaskStartBlockingEvaluator` all use consistent `COALESCE`-based ordering for task run queries.
+
+---
 ## [1.6.0] - 2026-04-02
 
 ### 🎨 Enhanced
