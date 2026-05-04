@@ -31,14 +31,12 @@ final class TaskDetailDataProvider
 
         $latestRun = TaskRunRecord::query()
             ->where('task_name', $task->name)
-            ->latest('started_at')
-            ->latest('created_at')
+            ->orderByRaw('COALESCE(finished_at, started_at, created_at) DESC')
             ->first();
 
         $recentRuns = TaskRunRecord::query()
             ->where('task_name', $task->name)
-            ->latest('started_at')
-            ->latest('created_at')
+            ->orderByRaw('COALESCE(finished_at, started_at, created_at) DESC')
             ->limit(10)
             ->get()
             ->map(fn (TaskRunRecord $run) => $this->mapRun($run))
@@ -77,8 +75,7 @@ final class TaskDetailDataProvider
 
         $runs = TaskRunRecord::query()
             ->where('task_name', $task->name)
-            ->latest('started_at')
-            ->latest('created_at')
+            ->orderByRaw('COALESCE(finished_at, started_at, created_at) DESC')
             ->paginate($perPage)
             ->withQueryString();
 
@@ -106,8 +103,7 @@ final class TaskDetailDataProvider
         $runs = TaskRunRecord::query()
             ->where('task_name', $task->name)
             ->where('status', TaskRunStatus::Failed->value)
-            ->latest('started_at')
-            ->latest('created_at')
+            ->orderByRaw('COALESCE(finished_at, started_at, created_at) DESC')
             ->paginate($perPage)
             ->withQueryString();
 
@@ -145,8 +141,7 @@ final class TaskDetailDataProvider
         if ($selectedRun === null) {
             $selectedRun = TaskRunRecord::query()
                 ->where('task_name', $task->name)
-                ->latest('started_at')
-                ->latest('created_at')
+                ->orderByRaw('COALESCE(finished_at, started_at, created_at) DESC')
                 ->with('logs')
                 ->first();
         }

@@ -14,8 +14,7 @@ final class FailedTaskRunIndexController
     {
         $runs = TaskRunRecord::query()
             ->where('status', TaskRunStatus::Failed->value)
-            ->latest('started_at')
-            ->latest('created_at')
+            ->orderByRaw('COALESCE(finished_at, started_at, created_at) DESC')
             ->paginate(20);
 
         return view('task-orchestrator::runs.failed', [

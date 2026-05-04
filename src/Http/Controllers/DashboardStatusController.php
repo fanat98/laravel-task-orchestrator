@@ -41,8 +41,7 @@ final class DashboardStatusController
             ->count();
 
         $latestRuns = TaskRunRecord::query()
-            ->latest('started_at')
-            ->latest('created_at')
+            ->orderByRaw('COALESCE(finished_at, started_at, created_at) DESC')
             ->limit(8)
             ->get()
             ->map(fn (TaskRunRecord $run) => [
@@ -58,8 +57,7 @@ final class DashboardStatusController
 
         $latestFailedRuns = TaskRunRecord::query()
             ->where('status', TaskRunStatus::Failed->value)
-            ->latest('started_at')
-            ->latest('created_at')
+            ->orderByRaw('COALESCE(finished_at, started_at, created_at) DESC')
             ->limit(5)
             ->get()
             ->map(fn (TaskRunRecord $run) => [
@@ -104,8 +102,7 @@ final class DashboardStatusController
 
                             $recentRuns = TaskRunRecord::query()
                                 ->where('task_name', $task->name)
-                                ->latest('started_at')
-                                ->latest('created_at')
+                                ->orderByRaw('COALESCE(finished_at, started_at, created_at) DESC')
                                 ->limit(5)
                                 ->get()
                                 ->map(fn (TaskRunRecord $run) => [

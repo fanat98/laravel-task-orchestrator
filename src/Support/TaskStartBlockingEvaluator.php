@@ -45,8 +45,7 @@ final class TaskStartBlockingEvaluator
 
         return TaskRunRecord::query()
             ->whereIn('task_name', array_values(array_unique($taskNames)))
-            ->orderByDesc('started_at')
-            ->orderByDesc('created_at')
+            ->orderByRaw('COALESCE(started_at, created_at) DESC')
             ->get()
             ->unique('task_name')
             ->mapWithKeys(fn (TaskRunRecord $run) => [$run->task_name => $run])
