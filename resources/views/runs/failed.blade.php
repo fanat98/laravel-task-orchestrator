@@ -8,13 +8,43 @@
         </div>
     </div>
 
-    @include('task-orchestrator::partials.summary-cards', [
-        'cards' => [
-            ['label' => 'Failed Runs Total', 'value' => $runs->total()],
-            ['label' => 'Shown On Page', 'value' => $runs->count()],
-            ['label' => 'Operational Focus', 'value' => 'Errors Only'],
-        ],
-    ])
+    <div class="stat-cards" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.25rem;">
+        <div class="stat-card stat-card--failed">
+            <div class="stat-card-body">
+                <div class="stat-card-label">FAILED RUNS TOTAL</div>
+                <div class="stat-card-value stat-card-value--failed">{{ $runs->total() }}</div>
+            </div>
+            <div class="stat-card-icon stat-card-icon--failed">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-body">
+                <div class="stat-card-label">SHOWN ON PAGE</div>
+                <div class="stat-card-value">{{ $runs->count() }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-body">
+                <div class="stat-card-label">OPERATIONAL FOCUS</div>
+                <div class="stat-card-value" style="font-size: 1.1rem;">Errors Only</div>
+            </div>
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+        </div>
+    </div>
 
     @if ($runs->isEmpty())
         <div class="panel">

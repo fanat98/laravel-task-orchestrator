@@ -8,13 +8,45 @@
         </div>
     </div>
 
-    @include('task-orchestrator::partials.summary-cards', [
-        'cards' => [
-            ['label' => 'Total Runs', 'value' => $runs->total()],
-            ['label' => 'Shown On Page', 'value' => $runs->count()],
-            ['label' => 'Failed Link', 'value' => 'Open Failed Runs'],
-        ],
-    ])
+    <div class="stat-cards" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.25rem;">
+        <div class="stat-card stat-card--tasks">
+            <div class="stat-card-body">
+                <div class="stat-card-label">TOTAL RUNS</div>
+                <div class="stat-card-value">{{ $runs->total() }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.08"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-body">
+                <div class="stat-card-label">SHOWN ON PAGE</div>
+                <div class="stat-card-value">{{ $runs->count() }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card stat-card--failed">
+            <div class="stat-card-body">
+                <div class="stat-card-label">FAILED RUNS</div>
+                <div class="stat-card-value">
+                    <a href="{{ route('task-orchestrator.runs.failed') }}" style="color: var(--red); text-decoration: none;">View Failed ↗</a>
+                </div>
+            </div>
+            <div class="stat-card-icon stat-card-icon--failed">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+            </div>
+        </div>
+    </div>
 
     @if ($runs->isEmpty())
         <div class="panel">

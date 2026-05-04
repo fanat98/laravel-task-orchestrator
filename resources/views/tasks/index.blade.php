@@ -8,13 +8,43 @@
         </div>
     </div>
 
-    @include('task-orchestrator::partials.summary-cards', [
-        'cards' => [
-            ['label' => 'Registered Tasks', 'value' => $tasks->count()],
-            ['label' => 'Manual Tasks', 'value' => $tasks->where('allow_manual_run', true)->count()],
-            ['label' => 'Scheduled Tasks', 'value' => $tasks->filter(fn ($task) => !empty($task['schedule']))->count()],
-        ],
-    ])
+    <div class="stat-cards" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.25rem;">
+        <div class="stat-card stat-card--tasks">
+            <div class="stat-card-body">
+                <div class="stat-card-label">REGISTERED TASKS</div>
+                <div class="stat-card-value">{{ $tasks->count() }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-body">
+                <div class="stat-card-label">MANUAL TASKS</div>
+                <div class="stat-card-value">{{ $tasks->where('allow_manual_run', true)->count() }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 9V5a3 3 0 0 0-6 0v4"/><rect x="2" y="9" width="20" height="13" rx="2"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-body">
+                <div class="stat-card-label">SCHEDULED TASKS</div>
+                <div class="stat-card-value">{{ $tasks->filter(fn ($task) => !empty($task['schedule']))->count() }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+            </div>
+        </div>
+    </div>
 
     @if ($tasks->isEmpty())
         <div class="panel">
