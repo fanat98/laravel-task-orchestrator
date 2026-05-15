@@ -20,7 +20,9 @@ A lightweight task orchestration layer for Laravel that adds visibility, depende
 * 👷 Queue worker liveness monitoring (running/down)
 * 🧯 Stale run recovery (auto-fail hanging tasks)
 * ⏱ Per-task timeout configuration
-* 📧 Optional failure/recovery notifications
+* 📧 Mail notifications on task failure and recovery (global + per-task config)
+* 📬 Per-task notification recipients with fallback to global recipient list
+* 🛡️ Graceful degradation when mail is not configured (no errors, no side effects)
 * 🔐 Security-focused notification emails (no raw failure payload in email body)
 * 🔗 Direct links from notification emails to run detail pages
 * 🌙 Dark / Light mode
