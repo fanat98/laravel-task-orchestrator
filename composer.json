@@ -8,6 +8,11 @@
             "Malsa\\TaskOrchestrator\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Malsa\\TaskOrchestrator\\Tests\\": "tests/"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [
@@ -19,6 +24,11 @@
         "php": "^8.2",
         "illuminate/support": "^11.0|^12.0",
         "dragonmantank/cron-expression": "^3.4"
+    },
+    "require-dev": {
+        "innmind/black-box": "^6.0",
+        "orchestra/testbench": "^10.0",
+        "phpunit/phpunit": "^12.5"
     },
     "minimum-stability": "stable",
     "prefer-stable": true

@@ -20,6 +20,9 @@ A lightweight task orchestration layer for Laravel that adds visibility, depende
 * 👷 Queue worker liveness monitoring (running/down)
 * 🧯 Stale run recovery (auto-fail hanging tasks)
 * ⏱ Per-task timeout configuration
+* 📧 Optional failure/recovery notifications
+* 🔐 Security-focused notification emails (no raw failure payload in email body)
+* 🔗 Direct links from notification emails to run detail pages
 * 🌙 Dark / Light mode
 * 📱 Responsive UI
 
@@ -87,8 +90,36 @@ return [
         'scheduler_heartbeat_max_age_seconds' => 180,
         'scheduler_heartbeat_ttl_seconds' => 86400,
     ],
+
+    'notifications' => [
+        'enabled' => false,
+        'recipients' => [],
+    ],
 ];
 ```
+
+---
+
+## 📧 Notifications
+
+Enable task notifications in `config/task-orchestrator.php`:
+
+```php
+'notifications' => [
+    'enabled' => true,
+    'recipients' => [
+        'ops@example.com',
+        'engineering@example.com',
+    ],
+],
+```
+
+Behavior:
+
+* on **failed** task runs: sends a failure notification email
+* on **recovered** task runs: sends a recovery notification email
+* emails include direct links to run details in Task Orchestrator
+* emails intentionally hide raw failure payload/details for security
 
 ---
 
@@ -235,6 +266,28 @@ Gate::define('viewTaskOrchestrator', fn ($user) => $user->is_admin);
 * Latest runs
 * Failed runs
 * Dark / Light mode toggle
+
+---
+
+## 🧪 Testing
+
+Run the package tests with the package phpunit config.
+
+When developing this package as a local path repository inside a host project,
+use the host project's PHPUnit binary:
+
+```bash
+cd packages/laravel-task-orchestrator
+../../vendor/bin/phpunit --configuration /absolute/path/to/packages/laravel-task-orchestrator/phpunit.xml --no-coverage
+```
+
+If you install package dependencies locally (`packages/laravel-task-orchestrator/vendor` exists),
+you can run:
+
+```bash
+cd packages/laravel-task-orchestrator
+vendor/bin/phpunit --configuration phpunit.xml --no-coverage
+```
 
 ---
 

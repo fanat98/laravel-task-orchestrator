@@ -21,7 +21,8 @@ final class DiscoveredTaskDefinitionFactory
      *     timeout_minutes?: int,
      *     queue?: string,
      *     connection?: string,
-     *     schedule?: array{expression?: string, human?: string}
+     *     schedule?: array{expression?: string, human?: string},
+     *     notifications?: array{enabled: bool, recipients: array<int, string>}|null
      * } $metadata
      */
     public function fromCommand(string $command, array $metadata = []): TaskDefinition
@@ -37,6 +38,7 @@ final class DiscoveredTaskDefinitionFactory
         $queue = $metadata['queue'] ?? null;
         $connection = $metadata['connection'] ?? null;
         $schedule = $metadata['schedule'] ?? null;
+        $notifications = $metadata['notifications'] ?? null;
 
         if ($queue !== null && ! is_string($queue)) {
             throw new \InvalidArgumentException(sprintf(
@@ -63,7 +65,8 @@ final class DiscoveredTaskDefinitionFactory
             ->timeoutMinutes($timeoutMinutes)
             ->queue($queue)
             ->connection($connection)
-            ->schedule($schedule);
+            ->schedule($schedule)
+            ->notifications($notifications);
     }
 
     private function makeNameFromCommand(string $command): string

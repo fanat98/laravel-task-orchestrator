@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+
+---
+## [1.7.0] - 2026-05-15
+
+### Added
+- **Task mail notifications**: Configurable email notifications on task failure and recovery (success after previous failure).
+- Global notification configuration via `task-orchestrator.notifications` (enabled, recipients).
+- Per-task notification configuration via discovery metadata `notifications` key, with precedence over global settings.
+- `NotificationEvaluationAction` orchestrates notification dispatch after terminal status transitions.
+- `NotificationConfigResolver` resolves effective enabled state and recipient list with global/per-task precedence.
+- `RecoveryDetector` determines if a successful run represents recovery from a previous failure.
+- `TaskFailedMailable` and `TaskRecoveredMailable` queued mailables with Blade email templates.
+- `NotificationPayload` value object for resolved notification data (validated emails, max 50 recipients).
+- `TaskDefinition::notifications()` fluent method for immutable per-task notification config.
+- `DiscoveredTaskDefinitionFactory` maps `notifications` key from discovery metadata.
+- Cache-based idempotence to prevent duplicate notifications per run/status.
+- Graceful degradation: notifications skip silently when `illuminate/mail` is not registered.
+- RFC 5322 email validation with invalid address filtering and warning logs.
+- Published Blade views via existing `task-orchestrator-views` publish tag for template customization.
+- Property-based tests (innmind/black-box) covering config resolution, email filtering, recovery detection, idempotence, and mail exception resilience.
+- Integration tests for failure notification flow, recovery notification flow, and service provider conditional registration.
+- Unit tests for `TaskFailedMailable` and `TaskRecoveredMailable`.
+
+### Changed
+- `ExecuteTaskRunAction` now accepts an optional `NotificationEvaluationAction` dependency and triggers notification evaluation after terminal status updates.
+- `ExecuteTaskRunJob::failed()` now triggers notification evaluation for timeout/exception failures.
+- `TaskOrchestratorServiceProvider` conditionally registers notification services when `mail.manager` is bound.
+
 ---
 ## [1.6.1] - 2026-05-04
 

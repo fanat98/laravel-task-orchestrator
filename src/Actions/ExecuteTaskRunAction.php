@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Malsa\TaskOrchestrator\Actions;
 
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Facades\Log;
 use Malsa\TaskOrchestrator\Console\TaskCommandOutput;
 use Malsa\TaskOrchestrator\Domain\Enums\TaskRunStatus;
 use Malsa\TaskOrchestrator\Models\TaskRunRecord;
 use Malsa\TaskOrchestrator\Support\CurrentTaskRunStore;
 use Malsa\TaskOrchestrator\Support\TaskContext;
+use Malsa\TaskOrchestrator\Support\TaskOrchestratorManager;
 use Throwable;
 
 final class ExecuteTaskRunAction
@@ -18,6 +20,7 @@ final class ExecuteTaskRunAction
         private readonly Kernel $artisan,
         private readonly CurrentTaskRunStore $currentTaskRunStore,
         private readonly StartDownstreamTasksAction $startDownstreamTasks,
+        private readonly ?NotificationEvaluationAction $notificationEvaluation = null,
     ) {
     }
 
@@ -89,6 +92,8 @@ final class ExecuteTaskRunAction
             if ($exitCode === 0) {
                 $this->startDownstreamTasks->execute($run->task_name, $run->pipeline_id);
             }
+
+            $this->evaluateNotifications($run);
         } catch (Throwable $exception) {
             $output->flushRemainingBuffer();
 
@@ -111,6 +116,8 @@ final class ExecuteTaskRunAction
                 'finished_at' => now(),
             ]);
 
+            $this->evaluateNotifications($run);
+
             throw $exception;
         } finally {
             $this->currentTaskRunStore->clear();
@@ -123,5 +130,28 @@ final class ExecuteTaskRunAction
             (int) ($run->timeout_seconds ?? ((int) config('task-orchestrator.stale_run_default_minutes', 10) * 60)),
             60
         );
+    }
+
+    private function evaluateNotifications(TaskRunRecord $run): void
+    {
+        if ($this->notificationEvaluation === null) {
+            return;
+        }
+
+        try {
+            $manager = app(TaskOrchestratorManager::class);
+            $definition = $manager->find($run->task_name);
+
+            if ($definition === null) {
+                return;
+            }
+
+            $this->notificationEvaluation->execute($run->fresh(), $definition);
+        } catch (Throwable $e) {
+            Log::error('Notification evaluation failed', [
+                'run_id' => $run->id,
+                'exception' => $e->getMessage(),
+            ]);
+        }
     }
 }

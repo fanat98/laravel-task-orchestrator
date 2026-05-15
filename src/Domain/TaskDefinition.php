@@ -13,6 +13,7 @@ final readonly class TaskDefinition
      *     human?: string
      * }|null $schedule
      * @param array<int, string> $dependsOn
+     * @param array{enabled: bool, recipients: array<int, string>}|null $notifications
      */
     private function __construct(
         public string  $name,
@@ -30,6 +31,7 @@ final readonly class TaskDefinition
         public bool    $allowConcurrentRuns,
         public ?string $queue,
         public ?string $connection,
+        public ?array  $notifications = null,
     ) {
         if ($this->name === '') {
             throw new \InvalidArgumentException('Task name cannot be empty.');
@@ -58,6 +60,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: false,
             queue: null,
             connection: null,
+            notifications: null,
         );
     }
 
@@ -79,6 +82,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -100,6 +104,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -121,6 +126,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -145,6 +151,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -166,6 +173,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -187,6 +195,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -208,6 +217,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -235,6 +245,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -259,6 +270,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -280,6 +292,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -301,6 +314,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -322,6 +336,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $allowConcurrentRuns,
             queue: $this->queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -343,6 +358,7 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $queue,
             connection: $this->connection,
+            notifications: $this->notifications,
         );
     }
 
@@ -364,6 +380,32 @@ final readonly class TaskDefinition
             allowConcurrentRuns: $this->allowConcurrentRuns,
             queue: $this->queue,
             connection: $connection,
+            notifications: $this->notifications,
+        );
+    }
+
+    /**
+     * @param array{enabled: bool, recipients: array<int, string>}|null $notifications
+     */
+    public function notifications(?array $notifications): self
+    {
+        return new self(
+            name: $this->name,
+            label: $this->label,
+            description: $this->description,
+            command: $this->command,
+            arguments: $this->arguments,
+            group: $this->group,
+            groupOrder: $this->groupOrder,
+            order: $this->order,
+            schedule: $this->schedule,
+            dependsOn: $this->dependsOn,
+            timeoutMinutes: $this->timeoutMinutes,
+            allowManualRun: $this->allowManualRun,
+            allowConcurrentRuns: $this->allowConcurrentRuns,
+            queue: $this->queue,
+            connection: $this->connection,
+            notifications: $notifications,
         );
     }
 

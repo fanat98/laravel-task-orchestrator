@@ -17,15 +17,32 @@ return [
     'middleware' => ['web', 'auth'],
 
     'authorization' => [
-        'mode' => 'user_field',
-        'field' => 'is_admin',
+        'enabled' => true,
+        'mode' => 'gate',
+        'gate' => 'viewTaskOrchestrator',
+        'user_field' => 'is_admin',
+        'forbidden_message' => 'You do not have permission to access Task Orchestrator.',
     ],
 
+    'database_connection' => env('TASK_ORCHESTRATOR_DB_CONNECTION'),
     'discovery_path' => app_path('TaskOrchestrator/discovery.php'),
-
     'fail_on_invalid_dependencies' => false,
-
     'stale_run_default_minutes' => 10,
+
+    'health' => [
+        'queue_stuck_threshold_seconds' => 300,
+        'queue_worker' => [
+            'heartbeat_max_age_seconds' => 60,
+        ],
+        'scheduler_heartbeat_cache_key' => 'task-orchestrator:scheduler-heartbeat',
+        'scheduler_heartbeat_max_age_seconds' => 180,
+        'scheduler_heartbeat_ttl_seconds' => 86400,
+    ],
+
+    'notifications' => [
+        'enabled' => false,
+        'recipients' => [],
+    ],
 ];
 ```
 
@@ -62,7 +79,7 @@ Controls access to the dashboard.
 ```php
 'authorization' => [
     'mode' => 'user_field',
-    'field' => 'is_admin',
+    'user_field' => 'is_admin',
 ]
 ```
 
@@ -71,7 +88,7 @@ Controls access to the dashboard.
 ```php
 'authorization' => [
     'mode' => 'gate',
-    'ability' => 'viewTaskOrchestrator',
+    'gate' => 'viewTaskOrchestrator',
 ]
 ```
 
@@ -108,6 +125,33 @@ Fallback timeout for detecting stale runs:
 ```
 
 Used when a task does not define its own timeout.
+
+---
+
+### notifications.enabled
+
+Enables or disables Task Orchestrator email notifications.
+
+```php
+true | false
+```
+
+When enabled, notifications are sent for failed runs and recovery runs.
+
+---
+
+### notifications.recipients
+
+Global recipient list for notifications.
+
+```php
+[
+    'ops@example.com',
+    'engineering@example.com',
+]
+```
+
+Notification emails include links to run detail pages and do not include raw failure payload details.
 
 ---
 
@@ -172,6 +216,7 @@ Cache TTL for heartbeat entries.
 * Use `gate` for advanced access control
 * Always configure scheduler + queue worker
 * Keep discovery file clean and structured
+* Keep notification recipients to operational/team mailboxes
 
 ---
 

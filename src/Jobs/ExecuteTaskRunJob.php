@@ -10,9 +10,12 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Malsa\TaskOrchestrator\Actions\ExecuteTaskRunAction;
+use Malsa\TaskOrchestrator\Actions\NotificationEvaluationAction;
 use Malsa\TaskOrchestrator\Domain\Enums\TaskRunStatus;
 use Malsa\TaskOrchestrator\Models\TaskRunRecord;
+use Malsa\TaskOrchestrator\Support\TaskOrchestratorManager;
 use Throwable;
 
 final class ExecuteTaskRunJob implements ShouldQueue
@@ -70,6 +73,34 @@ final class ExecuteTaskRunJob implements ShouldQueue
             'failure_message' => $message,
             'finished_at' => now(),
         ]);
+
+        $this->evaluateNotifications($run);
+    }
+
+    private function evaluateNotifications(TaskRunRecord $run): void
+    {
+        try {
+            if (! app()->bound('mail.manager')) {
+                return;
+            }
+
+            $notificationAction = app(NotificationEvaluationAction::class);
+            $manager = app(TaskOrchestratorManager::class);
+
+            $definition = $manager->find($run->task_name);
+
+            if ($definition === null) {
+                return;
+            }
+
+            $notificationAction->execute($run->fresh(), $definition);
+        } catch (Throwable $e) {
+            Log::error('Notification evaluation failed in ExecuteTaskRunJob::failed()', [
+                'run_id' => $run->id,
+                'message' => $e->getMessage(),
+                'exception' => $e,
+            ]);
+        }
     }
 
     private function touchQueueWorkerHeartbeat(): void

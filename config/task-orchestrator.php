@@ -49,4 +49,13 @@ return [
         'scheduler_heartbeat_max_age_seconds' => 180,
         'scheduler_heartbeat_ttl_seconds' => 86400,
     ],
+
+    /*
+     * Mail notification settings.
+     * When enabled, the system sends emails on task failure and recovery.
+     */
+    'notifications' => [
+        'enabled' => false,
+        'recipients' => [],
+    ],
 ];

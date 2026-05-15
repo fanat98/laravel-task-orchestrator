@@ -7,6 +7,7 @@ namespace Malsa\TaskOrchestrator;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\ServiceProvider;
 use Malsa\TaskOrchestrator\Actions\ExecuteTaskRunAction;
+use Malsa\TaskOrchestrator\Actions\NotificationEvaluationAction;
 use Malsa\TaskOrchestrator\Actions\RetryTaskRunAction;
 use Malsa\TaskOrchestrator\Actions\StartDownstreamTasksAction;
 use Malsa\TaskOrchestrator\Actions\StartTaskAction;
@@ -19,6 +20,8 @@ use Malsa\TaskOrchestrator\Support\DiscoveredScheduleRegistrar;
 use Malsa\TaskOrchestrator\Support\DiscoveredTaskDefinitionFactory;
 use Malsa\TaskOrchestrator\Support\ExecutionBlockingGuard;
 use Malsa\TaskOrchestrator\Support\HealthStateCalculator;
+use Malsa\TaskOrchestrator\Support\NotificationConfigResolver;
+use Malsa\TaskOrchestrator\Support\RecoveryDetector;
 use Malsa\TaskOrchestrator\Support\SystemHealthInspector;
 use Malsa\TaskOrchestrator\Support\TaskStartBlockingEvaluator;
 use Malsa\TaskOrchestrator\Support\TaskDependencyCompletionGuard;
@@ -29,6 +32,7 @@ use Malsa\TaskOrchestrator\Support\TaskOrchestratorManager;
 use Malsa\TaskOrchestrator\Support\TaskProgressUpdater;
 use Malsa\TaskOrchestrator\Support\TaskScheduleCalculator;
 use Malsa\TaskOrchestrator\Jobs\QueueHeartbeatJob;
+use Psr\Log\LoggerInterface;
 
 final class TaskOrchestratorServiceProvider extends ServiceProvider
 {
@@ -86,6 +90,7 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
                 $app->make(\Illuminate\Contracts\Console\Kernel::class),
                 $app->make(CurrentTaskRunStore::class),
                 $app->make(StartDownstreamTasksAction::class),
+                $app->bound('mail.manager') ? $app->make(NotificationEvaluationAction::class) : null,
             );
         });
 
@@ -151,6 +156,27 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
         $this->app->singleton(TaskDependencyCompletionGuard::class, function (): TaskDependencyCompletionGuard {
             return new TaskDependencyCompletionGuard();
         });
+
+        // Register notification services — these have no hard dependency on mail.
+        // The ExecuteTaskRunAction checks mail.manager availability at resolution time
+        // and injects null if mail is not available, ensuring graceful degradation.
+        $this->app->singleton(NotificationConfigResolver::class, function ($app): NotificationConfigResolver {
+            return new NotificationConfigResolver(
+                $app->make(LoggerInterface::class),
+            );
+        });
+
+        $this->app->singleton(RecoveryDetector::class, function (): RecoveryDetector {
+            return new RecoveryDetector();
+        });
+
+        $this->app->singleton(NotificationEvaluationAction::class, function ($app): NotificationEvaluationAction {
+            return new NotificationEvaluationAction(
+                $app->make(NotificationConfigResolver::class),
+                $app->make(RecoveryDetector::class),
+                $app->make(LoggerInterface::class),
+            );
+        });
     }
 
     public function boot(): void
@@ -162,6 +188,10 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../public/build' => public_path('vendor/task-orchestrator/build'),
         ], 'task-orchestrator-assets');
+
+        $this->publishes([
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/task-orchestrator'),
+        ], 'task-orchestrator-views');
 
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'task-orchestrator');
