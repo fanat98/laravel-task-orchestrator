@@ -52,20 +52,20 @@ return [
 
 ---
 
-## 5. Scheduler Setup (IMPORTANT)
+## 5. Scheduler Setup
 
-Add this to your scheduler:
+Task Orchestrator registers discovered task schedules, scheduler heartbeat, queue heartbeat and stale run recovery with Laravel's scheduler.
 
-```php
-$schedule->command('task-orchestrator:run-scheduled')->everyMinute();
+For local development, run:
+
+```bash
+php artisan schedule:work
 ```
 
-Optional (recommended):
+For production, run Laravel's scheduler every minute:
 
-```php
-$schedule->command('task-orchestrator:recover-stale-runs')
-    ->everyTenMinutes()
-    ->withoutOverlapping();
+```cron
+* * * * * cd /path/to/application && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 ---

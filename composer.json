@@ -1,8 +1,28 @@
 {
     "name": "fanat98/laravel-task-orchestrator",
-    "description": "Lightweight Laravel task orchestration dashboard with scheduling, dependencies and real-time monitoring",
+    "description": "Lightweight Laravel dashboard for orchestrating Artisan command workflows with dependencies, pipelines, scheduling, queue health checks and stale run recovery.",
     "type": "library",
+    "keywords": [
+        "laravel",
+        "laravel-package",
+        "task-orchestration",
+        "task-scheduler",
+        "laravel-scheduler",
+        "queue",
+        "queue-monitoring",
+        "dashboard",
+        "pipeline",
+        "workflow",
+        "artisan",
+        "monitoring",
+        "devops"
+    ],
+    "homepage": "https://github.com/fanat98/laravel-task-orchestrator",
     "license": "MIT",
+    "support": {
+        "issues": "https://github.com/fanat98/laravel-task-orchestrator/issues",
+        "source": "https://github.com/fanat98/laravel-task-orchestrator"
+    },
     "autoload": {
         "psr-4": {
             "Malsa\\TaskOrchestrator\\": "src/"

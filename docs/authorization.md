@@ -13,7 +13,7 @@ Two authorization modes are supported:
 
 ---
 
-## 🔹 Option 1 – User Field (Recommended)
+## Option 1: User Field
 
 Uses a boolean field on your User model.
 
@@ -22,7 +22,7 @@ Uses a boolean field on your User model.
 ```php
 'authorization' => [
     'mode' => 'user_field',
-    'field' => 'is_admin',
+    'user_field' => 'is_admin',
 ],
 ```
 
@@ -46,7 +46,7 @@ class User extends Authenticatable
 
 ---
 
-## 🔹 Option 2 – Gate
+## Option 2: Gate
 
 Uses Laravel Gates for full control.
 
@@ -55,7 +55,7 @@ Uses Laravel Gates for full control.
 ```php
 'authorization' => [
     'mode' => 'gate',
-    'ability' => 'viewTaskOrchestrator',
+    'gate' => 'viewTaskOrchestrator',
 ],
 ```
 
@@ -73,7 +73,7 @@ Gate::define('viewTaskOrchestrator', function ($user) {
 
 ---
 
-## 🔒 Behavior
+## Behavior
 
 If access is denied:
 
@@ -82,7 +82,7 @@ If access is denied:
 
 ---
 
-## 💡 Best Practices
+## Best Practices
 
 * Use `user_field` for internal/admin tools
 * Use `gate` if you need:

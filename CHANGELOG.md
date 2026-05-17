@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 
 ---
+## [1.7.1] - 2026-05-17
+
+### Added
+- Comprehensive PHPUnit test coverage across HTTP controllers, integration flows, console commands, queued jobs, support services, domain objects, registry behavior, and property-based invariants.
+- GitHub Actions workflow for running the package PHPUnit test suite.
+- Operations documentation covering scheduler setup, queue workers, health monitoring, stale run recovery, and common troubleshooting.
+
+### Changed
+- Reworked the README for public package usage with clearer positioning, installation steps, quick-start discovery configuration, generic dependency pipeline examples, dashboard access, health checks, stale run recovery, screenshots, support status, and troubleshooting.
+- Improved `composer.json` package metadata with a stronger description, Packagist keywords, homepage, and support links.
+- Updated installation and authorization documentation to match the current package configuration and scheduler behavior.
+- Updated README badges for Packagist version, downloads, license, PHP version, Laravel support, and test workflow status.
+
+---
 ## [1.7.0] - 2026-05-15
 
 ### Added
