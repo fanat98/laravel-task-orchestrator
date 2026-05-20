@@ -17,7 +17,7 @@ jobs:
         laravel: ['11.*', '12.*', '13.*']
         include:
           - laravel: '11.*'
-            testbench: '^10.0'
+            testbench: '^9.15'
           - laravel: '12.*'
             testbench: '^10.0'
           - laravel: '13.*'
@@ -40,8 +40,9 @@ jobs:
 
       - name: Resolve Laravel matrix dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-progress --no-update
-          composer update --prefer-dist --no-interaction --no-progress
+          composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-progress --no-update
+          composer require "orchestra/testbench:${{ matrix.testbench }}" --dev --no-interaction --no-progress --no-update
+          composer update --prefer-dist --with-all-dependencies --no-interaction --no-progress
 
       - name: Run tests
         run: vendor/bin/phpunit --no-coverage

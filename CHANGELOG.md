@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 
 ---
+## [1.7.3] - 2026-05-20
+
+### Fixed
+- Fixed GitHub Actions dependency resolution for the Laravel 11 test job by mapping it to `orchestra/testbench:^9.15`.
+- Updated workflow composer commands to keep Testbench in `require-dev` and allow transitive dependency adjustments during matrix resolution.
+
+---
 ## [1.7.2] - 2026-05-20
 
 ### Added
@@ -12,6 +19,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Updated README support matrix and badge to include Laravel 13.
+
 
 ---
 ## [1.7.1] - 2026-05-17
