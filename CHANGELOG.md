@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 
 ---
+## [1.7.2] - 2026-05-20
+
+### Added
+- Laravel 13 compatibility in package constraints (`illuminate/support`) and dev tooling (`orchestra/testbench`).
+- GitHub Actions test matrix coverage for Laravel 13 (alongside Laravel 11 and 12).
+
+### Changed
+- Updated README support matrix and badge to include Laravel 13.
+
+---
 ## [1.7.1] - 2026-05-17
 
 ### Added

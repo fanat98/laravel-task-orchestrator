@@ -2,7 +2,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/fanat98/laravel-task-orchestrator.svg)](https://packagist.org/packages/fanat98/laravel-task-orchestrator)
 [![License](https://img.shields.io/packagist/l/fanat98/laravel-task-orchestrator.svg)](composer.json)
 [![PHP Version](https://img.shields.io/packagist/php-v/fanat98/laravel-task-orchestrator.svg)](composer.json)
-[![Laravel](https://img.shields.io/badge/Laravel-11%20%7C%2012-red.svg)](composer.json)
+[![Laravel](https://img.shields.io/badge/Laravel-11%20%7C%2012%20%7C%2013-red.svg)](composer.json)
 [![Tests](https://img.shields.io/github/actions/workflow/status/fanat98/laravel-task-orchestrator/tests.yml?branch=main&label=tests)](https://github.com/fanat98/laravel-task-orchestrator/actions/workflows/tests.yml)
 
 # Laravel Task Orchestrator
@@ -45,7 +45,7 @@ Use this package when your Laravel application has Artisan commands that:
 ## Requirements
 
 - PHP 8.2+
-- Laravel 11 or 12
+- Laravel 11, 12 or 13
 - A configured Laravel queue connection
 - Laravel's scheduler running in production
 
@@ -441,7 +441,7 @@ This package is early but usable. It is intended for Laravel applications that w
 Supported runtime versions:
 
 - PHP 8.2+
-- Laravel 11 and 12
+- Laravel 11, 12 and 13
 
 Issues, bug reports, practical feedback and contributions are welcome through GitHub.
 

@@ -14,8 +14,16 @@ jobs:
       fail-fast: true
       matrix:
         php: ['8.3', '8.4']
+        laravel: ['11.*', '12.*', '13.*']
+        include:
+          - laravel: '11.*'
+            testbench: '^10.0'
+          - laravel: '12.*'
+            testbench: '^10.0'
+          - laravel: '13.*'
+            testbench: '^11.0'
 
-    name: PHP ${{ matrix.php }}
+    name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }}
 
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +37,11 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Resolve Laravel matrix dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-progress --no-update
+          composer update --prefer-dist --no-interaction --no-progress
 
       - name: Run tests
         run: vendor/bin/phpunit --no-coverage
