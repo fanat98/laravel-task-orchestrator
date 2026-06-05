@@ -31,6 +31,8 @@ For production, run Laravel's scheduler every minute:
 
 The package also registers internal scheduled tasks for scheduler heartbeat, queue heartbeat and stale run recovery.
 
+It additionally registers scheduled-run monitoring so missed cron-based tasks are surfaced as a critical health condition and can trigger email notifications.
+
 ## Queue Workers
 
 Task runs are executed through Laravel queues. Start a worker for the queues used by your tasks:
@@ -62,6 +64,20 @@ Scheduler state is based on the heartbeat written by `task-orchestrator:record-s
 Queue worker state is based on a worker heartbeat refreshed by scheduled heartbeat jobs and task execution jobs.
 
 Scheduled task dispatch is skipped when the queue worker heartbeat is stale or missing. This prevents a queue outage from creating a large backlog of orchestrator runs.
+
+## Scheduled-Run Monitoring
+
+Missed scheduled runs are monitored independently from failed jobs. This matters because a task can be due, never start and still leave the dashboard looking healthy if the queue and scheduler heartbeats remain fresh.
+
+The monitoring command is:
+
+```bash
+php artisan task-orchestrator:monitor-scheduled-runs
+```
+
+It checks all cron-based tasks, reports missed runs as critical health and can send email alerts to the configured recipients. When the incident clears, a recovery email is sent once.
+
+By default, the monitoring command exits with a non-zero status when missed runs are detected so CI/CD, cron wrappers or external alerting can react immediately.
 
 ## Stale Run Recovery
 
