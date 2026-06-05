@@ -15,6 +15,8 @@ All notable changes to this project will be documented in this file.
 - Scheduled task health now reports missed scheduled runs as critical so silent schedule gaps become visible immediately.
 - Project configuration now uses a more tolerant queue-worker heartbeat threshold to reduce false skips during short restarts.
 - Documentation was updated to describe the new scheduled monitoring and email notification behavior.
+- Dropped Laravel 11 support: the entire 11.x line carries unpatched security advisories. The package now officially supports Laravel 12 and 13.
+- CI test matrix updated to Laravel 12 and 13 only.
 
 ### Fixed
 - Prevented missed scheduled runs from remaining green in the dashboard when no failed job record was created.
