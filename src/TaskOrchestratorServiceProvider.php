@@ -22,6 +22,7 @@ use Malsa\TaskOrchestrator\Support\ExecutionBlockingGuard;
 use Malsa\TaskOrchestrator\Support\HealthStateCalculator;
 use Malsa\TaskOrchestrator\Support\NotificationConfigResolver;
 use Malsa\TaskOrchestrator\Support\RecoveryDetector;
+use Malsa\TaskOrchestrator\Support\ScheduledTaskMonitor;
 use Malsa\TaskOrchestrator\Support\SystemHealthInspector;
 use Malsa\TaskOrchestrator\Support\TaskStartBlockingEvaluator;
 use Malsa\TaskOrchestrator\Support\TaskDependencyCompletionGuard;
@@ -110,7 +111,14 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
 
         $this->app->singleton(SystemHealthInspector::class, function (): SystemHealthInspector {
             return new SystemHealthInspector(
-                $this->app->make(HealthStateCalculator::class)
+                $this->app->make(HealthStateCalculator::class),
+                $this->app->make(ScheduledTaskMonitor::class),
+            );
+        });
+
+        $this->app->singleton(ScheduledTaskMonitor::class, function ($app): ScheduledTaskMonitor {
+            return new ScheduledTaskMonitor(
+                $app->make(TaskOrchestratorManager::class)
             );
         });
 
@@ -209,6 +217,7 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
                 \Malsa\TaskOrchestrator\Console\Commands\RunScheduledTaskCommand::class,
                 \Malsa\TaskOrchestrator\Console\Commands\RecoverStaleTaskRunsCommand::class,
                 \Malsa\TaskOrchestrator\Console\Commands\RecordSchedulerHeartbeatCommand::class,
+                \Malsa\TaskOrchestrator\Console\Commands\MonitorScheduledTaskRunsCommand::class,
             ]);
         }
 
@@ -234,6 +243,10 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
 
                     $schedule->job((new QueueHeartbeatJob())->onQueue('default'))
                         ->everyMinute();
+
+                    $schedule->command('task-orchestrator:monitor-scheduled-runs')
+                        ->everyFiveMinutes()
+                        ->withoutOverlapping();
                 }
             );
         });
