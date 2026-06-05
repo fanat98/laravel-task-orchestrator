@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 
 ---
+## [1.8.0] - 2026-06-05
+
+### Added
+- Missed scheduled-run monitoring for all cron-based tasks, including health payload reporting and a dedicated `task-orchestrator:monitor-scheduled-runs` command.
+- Scheduled-run alert emails with incident deduplication and recovery notifications.
+- Monitoring configuration for grace period, command failure behavior and notification recipients.
+
+### Changed
+- Scheduled task health now reports missed scheduled runs as critical so silent schedule gaps become visible immediately.
+- Project configuration now uses a more tolerant queue-worker heartbeat threshold to reduce false skips during short restarts.
+- Documentation was updated to describe the new scheduled monitoring and email notification behavior.
+
+### Fixed
+- Prevented missed scheduled runs from remaining green in the dashboard when no failed job record was created.
+
+---
 ## [1.7.3] - 2026-05-20
 
 ### Fixed
