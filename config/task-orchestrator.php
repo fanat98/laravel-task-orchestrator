@@ -54,6 +54,12 @@ return [
         'enabled' => true,
         'grace_minutes' => 20,
         'fail_command_on_missed' => true,
+        'notifications' => [
+            // Null means fallback to global task-orchestrator.notifications.enabled.
+            'enabled' => null,
+            // Empty list means fallback to global task-orchestrator.notifications.recipients.
+            'recipients' => [],
+        ],
     ],
 
     /*

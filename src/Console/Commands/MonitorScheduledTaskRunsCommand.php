@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Malsa\TaskOrchestrator\Console\Commands;
 
 use Illuminate\Console\Command;
+use Malsa\TaskOrchestrator\Actions\ScheduledMonitoringNotificationAction;
 use Malsa\TaskOrchestrator\Support\ScheduledTaskMonitor;
 
 final class MonitorScheduledTaskRunsCommand extends Command
@@ -17,6 +18,7 @@ final class MonitorScheduledTaskRunsCommand extends Command
 
     public function __construct(
         private readonly ScheduledTaskMonitor $monitor,
+        private readonly ScheduledMonitoringNotificationAction $notificationAction,
     ) {
         parent::__construct();
     }
@@ -31,6 +33,7 @@ final class MonitorScheduledTaskRunsCommand extends Command
 
         $graceMinutes = $this->resolveGraceMinutesOption();
         $result = $this->monitor->inspect($graceMinutes);
+        $this->notificationAction->execute($result);
 
         if ($result['missed_count'] === 0) {
             $this->info(sprintf(

@@ -7,8 +7,12 @@ namespace Malsa\TaskOrchestrator\Tests\Feature\Integration\Console;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Malsa\TaskOrchestrator\Domain\TaskDefinition;
+use Malsa\TaskOrchestrator\Mail\MissedScheduledTasksAlertMailable;
+use Malsa\TaskOrchestrator\Mail\ScheduledTasksRecoveredMailable;
 use Malsa\TaskOrchestrator\Models\TaskRunRecord;
 use Malsa\TaskOrchestrator\Support\TaskOrchestratorManager;
 use Malsa\TaskOrchestrator\Tests\TestCase;
@@ -16,6 +20,13 @@ use Malsa\TaskOrchestrator\Tests\TestCase;
 class MonitorScheduledTaskRunsCommandTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Cache::flush();
+    }
 
     public function test_command_is_successful_when_all_scheduled_tasks_are_recent(): void
     {
@@ -92,6 +103,72 @@ class MonitorScheduledTaskRunsCommandTest extends TestCase
         $this->artisan('task-orchestrator:monitor-scheduled-runs', ['--fail-on-missed' => 'false'])
             ->expectsOutput('Found 1 missed scheduled task(s).')
             ->assertSuccessful();
+
+        Carbon::setTestNow();
+    }
+
+    public function test_command_queues_missed_run_alert_only_once_per_active_incident(): void
+    {
+        Carbon::setTestNow('2026-06-06 03:00:00');
+        Mail::fake();
+
+        config()->set('task-orchestrator.notifications.enabled', true);
+        config()->set('task-orchestrator.notifications.recipients', ['ops@example.com']);
+
+        $manager = app(TaskOrchestratorManager::class);
+        $manager->register(
+            TaskDefinition::make('watch-end-date')
+                ->label('Watch End Date')
+                ->command('watch:end-date')
+                ->schedule(['expression' => '0 2 * * *', 'human' => 'Daily at 02:00'])
+        );
+
+        $this->artisan('task-orchestrator:monitor-scheduled-runs')
+            ->assertExitCode(Command::FAILURE);
+
+        $this->artisan('task-orchestrator:monitor-scheduled-runs')
+            ->assertExitCode(Command::FAILURE);
+
+        Mail::assertQueued(MissedScheduledTasksAlertMailable::class, 1);
+
+        Carbon::setTestNow();
+    }
+
+    public function test_command_queues_recovery_mail_when_incident_is_resolved(): void
+    {
+        Carbon::setTestNow('2026-06-06 03:00:00');
+        Mail::fake();
+
+        config()->set('task-orchestrator.notifications.enabled', true);
+        config()->set('task-orchestrator.notifications.recipients', ['ops@example.com']);
+
+        $manager = app(TaskOrchestratorManager::class);
+        $manager->register(
+            TaskDefinition::make('watch-end-date')
+                ->label('Watch End Date')
+                ->command('watch:end-date')
+                ->schedule(['expression' => '0 2 * * *', 'human' => 'Daily at 02:00'])
+        );
+
+        $this->artisan('task-orchestrator:monitor-scheduled-runs')
+            ->assertExitCode(Command::FAILURE);
+
+        TaskRunRecord::query()->create([
+            'id' => Str::uuid()->toString(),
+            'task_name' => 'watch-end-date',
+            'task_label' => 'Watch End Date',
+            'command' => 'watch:end-date',
+            'status' => 'succeeded',
+            'trigger_type' => 'scheduled',
+            'started_at' => Carbon::parse('2026-06-06 02:00:10'),
+            'finished_at' => Carbon::parse('2026-06-06 02:00:20'),
+        ]);
+
+        $this->artisan('task-orchestrator:monitor-scheduled-runs')
+            ->assertSuccessful();
+
+        Mail::assertQueued(MissedScheduledTasksAlertMailable::class, 1);
+        Mail::assertQueued(ScheduledTasksRecoveredMailable::class, 1);
 
         Carbon::setTestNow();
     }
