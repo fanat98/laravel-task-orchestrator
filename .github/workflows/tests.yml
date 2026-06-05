@@ -14,10 +14,12 @@ jobs:
       fail-fast: true
       matrix:
         php: ['8.3', '8.4']
-        laravel: ['11.*', '12.*', '13.*']
+        # Laravel 11 is intentionally excluded from CI: the entire 11.x line is
+        # currently flagged by unpatched security advisories, so resolving it
+        # would require bypassing Composer's advisory protection. The package
+        # still declares Laravel 11 support in composer.json.
+        laravel: ['12.*', '13.*']
         include:
-          - laravel: '11.*'
-            testbench: '^9.15'
           - laravel: '12.*'
             testbench: '^10.0'
           - laravel: '13.*'
@@ -35,15 +37,6 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
           coverage: none
 
-      - name: Relax advisory policy (CI only)
-        # Test-only: allow resolving framework versions that currently carry
-        # security advisories. The entire Laravel 11 line is flagged without a
-        # patched release, which otherwise makes the matrix unresolvable.
-        # This only affects the ephemeral CI runner, never the published
-        # package or the host application.
-        run: |
-          php -r '$f="composer.json";$j=json_decode(file_get_contents($f),true);$j["policy"]["advisories"]["block"]=false;file_put_contents($f,json_encode($j,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL);'
-
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
@@ -51,7 +44,7 @@ jobs:
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-progress --no-update
           composer require "orchestra/testbench:${{ matrix.testbench }}" --dev --no-interaction --no-progress --no-update
-          composer update --prefer-dist --with-all-dependencies --no-interaction --no-progress --no-audit
+          composer update --prefer-dist --with-all-dependencies --no-interaction --no-progress
 
       - name: Run tests
         run: vendor/bin/phpunit --no-coverage

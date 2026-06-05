@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 
 ---
+## [1.8.2] - 2026-06-05
+
+### Fixed
+- Corrected synchronous mail dispatch for missed-run alert and recovery emails to ensure notifications reach recipients even when the queue worker is temporarily unavailable.
+
+---
+## [1.8.1] - 2026-06-05
+
+### Changed
+- Dropped Laravel 11 from the supported versions: the entire 11.x line currently carries unpatched security advisories. The package now officially requires Laravel 12 or 13.
+- Updated `illuminate/support` constraint from `^11.0|^12.0|^13.0` to `^12.0|^13.0`.
+- CI test matrix narrowed to Laravel 12 and 13; removed advisory-policy workaround that was needed to force-resolve the blocked 11.x line.
+- Updated README badge and requirements section to reflect Laravel 12 and 13 only.
+
+---
 ## [1.8.0] - 2026-06-05
 
 ### Added
