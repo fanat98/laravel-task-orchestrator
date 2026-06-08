@@ -7,6 +7,7 @@ namespace Malsa\TaskOrchestrator\Tests\Feature\Integration\Console;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Queue;
+use Malsa\TaskOrchestrator\Domain\Enums\TaskRunStatus;
 use Malsa\TaskOrchestrator\Domain\TaskDefinition;
 use Malsa\TaskOrchestrator\Jobs\ExecuteTaskRunJob;
 use Malsa\TaskOrchestrator\Models\TaskRunRecord;
@@ -56,11 +57,11 @@ class RunScheduledTaskCommandTest extends TestCase
     }
 
     /**
-     * Test: skips task when queue worker heartbeat is stale.
+     * Test: marks a scheduled start as failed when queue worker heartbeat is stale.
      *
      * Validates: Requirement 12.3
      */
-    public function test_skips_task_when_queue_worker_is_down(): void
+    public function test_marks_task_as_failed_when_queue_worker_is_down(): void
     {
         Queue::fake();
 
@@ -79,18 +80,24 @@ class RunScheduledTaskCommandTest extends TestCase
 
         Queue::assertNothingPushed();
 
-        $this->assertFalse(
-            TaskRunRecord::query()->where('task_name', 'scheduled-task')->exists(),
-            'No task run should be created when queue worker is down'
-        );
+        $failedRun = TaskRunRecord::query()
+            ->where('task_name', 'scheduled-task')
+            ->where('trigger_type', 'scheduled')
+            ->latest('created_at')
+            ->first();
+
+        $this->assertNotNull($failedRun);
+        $this->assertSame(TaskRunStatus::Failed->value, $failedRun->status);
+        $this->assertNotNull($failedRun->finished_at);
+        $this->assertStringContainsString('Scheduled task was not started.', (string) $failedRun->failure_message);
     }
 
     /**
-     * Test: skips task when queue worker heartbeat is missing.
+     * Test: marks a scheduled start as failed when queue worker heartbeat is missing.
      *
      * Validates: Requirement 12.3
      */
-    public function test_skips_task_when_queue_worker_heartbeat_missing(): void
+    public function test_marks_task_as_failed_when_queue_worker_heartbeat_missing(): void
     {
         Queue::fake();
 
@@ -108,5 +115,13 @@ class RunScheduledTaskCommandTest extends TestCase
             ->assertSuccessful();
 
         Queue::assertNothingPushed();
+
+        $this->assertTrue(
+            TaskRunRecord::query()
+                ->where('task_name', 'scheduled-task')
+                ->where('trigger_type', 'scheduled')
+                ->where('status', TaskRunStatus::Failed->value)
+                ->exists()
+        );
     }
 }

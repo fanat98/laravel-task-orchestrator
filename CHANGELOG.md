@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 
 ---
+## [1.8.3] - 2026-06-08
+
+### Changed
+- Simplified scheduled-run behavior: when a scheduled task cannot be started, Task Orchestrator now records a failed scheduled run with a clear failure reason.
+- Scheduled runs that fail to start are not retried immediately and are attempted again only at the next regular cron due time.
+
+### Removed
+- Removed missed scheduled-run monitoring command (`task-orchestrator:monitor-scheduled-runs`).
+- Removed missed-run health escalation and dedicated missed/recovered scheduled-run email notifications.
+- Removed scheduled monitoring configuration and related documentation sections.
+
+---
 ## [1.8.2] - 2026-06-05
 
 ### Fixed

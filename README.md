@@ -377,7 +377,7 @@ The dashboard reports:
 
 Queue health is based on pending jobs and the configured stuck threshold. Scheduler health is based on a scheduler heartbeat written every minute. Queue worker health is based on a worker heartbeat refreshed by scheduled heartbeat jobs and task execution jobs.
 
-Scheduled tasks are skipped when the queue worker heartbeat is stale or missing. This protects the application from accumulating large numbers of queued orchestrator runs during a worker outage.
+When a scheduled task cannot be started (for example because queue worker heartbeat is stale), Task Orchestrator records a failed scheduled run with a clear failure reason in run history. The task is not retried immediately and will run again at the next regular cron due time.
 
 ## Screenshots
 

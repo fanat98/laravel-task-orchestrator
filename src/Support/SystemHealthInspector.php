@@ -13,7 +13,6 @@ final class SystemHealthInspector
 {
     public function __construct(
         private readonly HealthStateCalculator $stateCalculator,
-        private readonly ScheduledTaskMonitor $scheduledTaskMonitor,
     ) {
     }
 
@@ -23,7 +22,6 @@ final class SystemHealthInspector
      *     queue: array{status: string, pending_jobs: int|null, oldest_pending_job_age_seconds: int|null},
      *     scheduler: array{status: string, last_heartbeat_at: string|null},
      *     queue_worker: array{status: string, last_heartbeat_at: string|null},
-     *     scheduled_tasks: array{status: string, checked_tasks: int, missed_count: int, grace_minutes: int, message: string, missed_tasks: array<int, array{task_name: string, task_label: string, group: string|null, schedule_expression: string, last_due_at: string, last_scheduled_run_at: string|null, minutes_overdue: int}>},
      *     pending_jobs: int|null,
      *     oldest_pending_job_age_seconds: int|null,
      *     message: string
@@ -62,8 +60,6 @@ final class SystemHealthInspector
             $now,
             $queueWorkerHeartbeatMaxAgeSeconds
         );
-        $scheduledTaskMonitoring = $this->scheduledTaskMonitor->inspect(now: $now);
-
         $pendingJobsForAggregation = $pendingJobs ?? 0;
         $overallStatus = $this->stateCalculator->overallStatus(
             $queueStatus,
@@ -77,14 +73,6 @@ final class SystemHealthInspector
             $queueWorkerStatus,
             $pendingJobsForAggregation,
         );
-
-        if (($scheduledTaskMonitoring['missed_count'] ?? 0) > 0) {
-            $overallStatus = 'critical';
-            $message = sprintf(
-                'Detected %d missed scheduled task(s).',
-                (int) $scheduledTaskMonitoring['missed_count']
-            );
-        }
 
         return [
             'status' => $overallStatus,
@@ -101,7 +89,6 @@ final class SystemHealthInspector
                 'status' => $queueWorkerStatus,
                 'last_heartbeat_at' => $lastQueueWorkerHeartbeatAt?->toIso8601String(),
             ],
-            'scheduled_tasks' => $scheduledTaskMonitoring,
             // Keep top-level metrics for backward compatibility in the dashboard payload.
             'pending_jobs' => $pendingJobs,
             'oldest_pending_job_age_seconds' => $oldestPendingJobAgeSeconds,
