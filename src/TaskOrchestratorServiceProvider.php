@@ -22,6 +22,7 @@ use Malsa\TaskOrchestrator\Support\ExecutionBlockingGuard;
 use Malsa\TaskOrchestrator\Support\HealthStateCalculator;
 use Malsa\TaskOrchestrator\Support\NotificationConfigResolver;
 use Malsa\TaskOrchestrator\Support\RecoveryDetector;
+use Malsa\TaskOrchestrator\Support\ScheduledArtisanCallback;
 use Malsa\TaskOrchestrator\Support\SystemHealthInspector;
 use Malsa\TaskOrchestrator\Support\TaskStartBlockingEvaluator;
 use Malsa\TaskOrchestrator\Support\TaskDependencyCompletionGuard;
@@ -225,11 +226,14 @@ final class TaskOrchestratorServiceProvider extends ServiceProvider
 
                     $registrar->register($schedule, $tasks);
 
-                    $schedule->command('task-orchestrator:recover-stale-runs')
+                    // In-process callbacks instead of Schedule::command(): no shell is required.
+                    $schedule->call(new ScheduledArtisanCallback('task-orchestrator:recover-stale-runs'))
+                        ->name('task-orchestrator:recover-stale-runs')
                         ->everyTenMinutes()
                         ->withoutOverlapping();
 
-                    $schedule->command('task-orchestrator:record-scheduler-heartbeat')
+                    $schedule->call(new ScheduledArtisanCallback('task-orchestrator:record-scheduler-heartbeat'))
+                        ->name('task-orchestrator:record-scheduler-heartbeat')
                         ->everyMinute();
 
                     $schedule->job((new QueueHeartbeatJob())->onQueue('default'))

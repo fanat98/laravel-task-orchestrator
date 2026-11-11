@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+---
+## [1.8.4] - 2026-11-11
+
+### Changed
+- Scheduler no longer requires a shell (compatible with Docker Hardened Images): discovered tasks, `task-orchestrator:recover-stale-runs` and `task-orchestrator:record-scheduler-heartbeat` are scheduled as in-process callbacks (`ScheduledArtisanCallback` → `Artisan::call()`) instead of `Schedule::command()`.
+- Scheduled events now use stable names (e.g. `task-orchestrator:run-scheduled-task <task>`) as the `withoutOverlapping()` mutex key. A non-zero exit code marks the scheduled event as failed and logs the captured command output.
 
 ---
 ## [1.8.3] - 2026-06-08

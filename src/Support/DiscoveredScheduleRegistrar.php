@@ -22,10 +22,14 @@ final class DiscoveredScheduleRegistrar
             return;
         }
 
-        $event = $schedule->command(
-            sprintf('task-orchestrator:run-scheduled-task %s', escapeshellarg($task->name))
-        );
+        // In-process callback instead of Schedule::command(): no shell is required.
+        $event = $schedule->call(new ScheduledArtisanCallback(
+            'task-orchestrator:run-scheduled-task',
+            ['task' => $task->name],
+        ));
 
+        // Stable, unique name: required for withoutOverlapping() and used as mutex key.
+        $event->name(sprintf('task-orchestrator:run-scheduled-task %s', $task->name));
         $event->cron($task->schedule['expression']);
 
         if (! $task->allowConcurrentRuns) {
